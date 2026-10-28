@@ -1,0 +1,2073 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kymera Battlegrounds</title>
+<style>
+:root{--ink:#f2e7da;--dim:#b8a797;--maroon:#7a1b26;--edge:#4f1d25;--bone:#ecdfc7;--gold:#dcae5a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#140a0c;color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at center,rgba(20,10,12,.35),rgba(20,10,12,.9))}
+.screen.on{display:flex}
+.panel{width:min(520px,100%);max-height:100%;overflow:auto;padding:28px;background:rgba(18,9,11,.9);border:1px solid var(--edge);border-radius:6px}
+.logo{color:var(--gold);font-style:italic;font-size:18px}
+h1{margin:4px 0 10px;font-size:clamp(38px,8vw,60px);line-height:1;color:var(--bone)}
+h2{margin:0 0 12px;font-size:28px;color:var(--bone)}
+p{color:var(--dim);line-height:1.55;margin:8px 0}
+button{font:inherit;font-size:17px;color:var(--ink);background:var(--maroon);border:1px solid #a3343f;border-radius:4px;padding:11px 18px;cursor:pointer;margin:6px 6px 6px 0}
+button:hover:not(:disabled){background:#9a2432}
+button:disabled{background:#2a1b1e;border-color:#3b2a2e;color:#7d6d66;cursor:not-allowed}
+button.ghost{background:transparent;border-color:#5a3a40}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
+.card{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--edge);border-radius:4px;padding:12px 14px;margin:10px 0;background:rgba(40,14,18,.6)}
+.card b{display:block;font-size:19px;color:var(--bone)}
+.note{font-size:14px;color:#8e7e77}
+.money{color:var(--gold);font-weight:700}
+.code{font-size:40px;letter-spacing:.15em;color:var(--bone);font-weight:700;margin:12px 0}
+input{font:inherit;font-size:17px;padding:10px;border-radius:4px;border:1px solid #5a3a40;background:#1a0e10;color:var(--ink);width:150px;text-transform:uppercase}
+#hud{position:fixed;left:0;right:0;top:0;display:none;justify-content:space-between;align-items:flex-start;gap:14px;padding:12px 16px 0;pointer-events:none}
+.bar{width:min(300px,34vw);font-size:15px;color:var(--dim)}
+.bar.r{text-align:right}
+.track{height:14px;margin-top:4px;background:#1d0d10;border:1px solid #5a3a40;border-radius:2px;overflow:hidden}
+.fill{height:100%;width:100%;background:linear-gradient(#c23b48,#6e1420);transition:width .15s}
+.mid{text-align:center;color:var(--dim);font-size:14px;pointer-events:auto}
+.mid b{display:block;font-size:20px;color:var(--bone)}
+.mid button{margin:4px 2px 0;padding:6px 10px;font-size:14px}
+.track.thin{height:8px;margin-top:6px}.meter{background:linear-gradient(#9fe0ff,#2f7fb8)}
+.black{background:#000}
+.home{background:none;flex-direction:column;justify-content:center;align-items:center}
+.brand{position:fixed;top:16px;left:16px;display:flex;flex-direction:column;align-items:center;gap:8px;width:clamp(150px,22vw,260px)}
+.brand-logo{width:90px;height:auto}
+.brand-word{width:100%;height:auto}
+.home-col{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(340px,90vw)}
+.home-title{font-size:clamp(36px,7vw,80px);margin:0 0 18px;color:var(--bone);text-align:center;letter-spacing:.02em;text-shadow:0 4px 24px #000}
+.home-btn{width:100%;border-radius:0;margin:0;padding:14px 18px;font-size:18px;background:rgba(40,8,12,.88);border:1px solid #a3343f}
+.platform-change{position:fixed;right:16px;bottom:16px;margin:0;font-size:14px;background:rgba(10,5,7,.7);border-color:#5a3a40}
+#bgWrap{position:fixed;inset:0;overflow:hidden;z-index:0}
+#bgWrap::after{content:"";position:absolute;inset:0;background:rgba(6,3,5,.62)}
+.bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.5s ease}
+.bg.on{opacity:1}
+#sSelect{background:none;align-items:flex-end;padding-bottom:28px}
+.choose-stack{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(460px,94vw)}
+.choose-name{position:fixed;top:18px;left:0;right:0;text-align:center;margin:0;font-size:clamp(28px,5vw,52px);text-shadow:0 2px 16px #000}
+.arrow{font-size:28px;padding:6px 22px;margin:0}
+.price{font-size:20px;color:var(--gold);font-weight:700;text-shadow:0 2px 10px #000;min-width:200px;text-align:center}
+.stats-toggle{width:100%;border-radius:0;margin:0;display:flex;justify-content:space-between;background:rgba(18,9,11,.88);border:1px solid #4f1d25;padding:12px 18px}
+.stats-panel{width:100%;background:rgba(18,9,11,.9);border:1px solid #4f1d25;padding:12px 18px;line-height:1.7;color:var(--dim)}
+.plist{list-style:none;padding:0;margin:6px 0;color:var(--bone)}
+.plist li{padding:4px 0}
+.bindrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #2a1b1e}
+.bindbtn{margin:0;min-width:180px;background:#1a0e10;border:1px solid #5a3a40}
+.bindbtn.bad{border:2px solid #ff3030;background:#3a0a0a}
+.mapBtn.on{border-color:var(--gold);color:var(--gold)}
+.hud-bottom{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(640px,94vw);flex-direction:column;gap:6px;pointer-events:none}
+.ult-label,.ab-label{text-align:center;color:var(--bone);font-size:14px;text-shadow:0 1px 6px #000;min-height:18px}
+.ult-track{height:20px;background:#1d0d10;border:2px solid #dcae5a;overflow:hidden}
+.ult-fill{height:100%;width:0;background:linear-gradient(#ffd27a,#b8741a);transition:width .15s}
+.ab-track{height:8px;background:#1d0d10;border:1px solid #5a3a40;overflow:hidden}
+.ab-fill{height:100%;width:0;background:linear-gradient(#9fe0ff,#2f7fb8);transition:width .15s}
+.moves{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.move{position:relative;height:60px;background:rgba(18,9,11,.9);border:1px solid #5a3a40;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;color:var(--bone);font-size:13px}
+.mfill{position:absolute;left:0;bottom:0;width:100%;height:0;background:rgba(190,40,60,.55);transition:height .15s}
+.move span{position:relative;text-shadow:0 1px 6px #000}
+.cols{display:flex;gap:18px;flex-wrap:wrap}.cols>div{flex:1;min-width:200px}
+.fixedbar{position:fixed;top:78px;width:min(300px,34vw);font-size:15px;color:var(--dim)}
+.fixedbar-l{left:16px}
+.fixedbar-r{right:16px;text-align:right}
+.slot{display:flex;align-items:center;gap:10px;border:1px solid #4f1d25;padding:8px;margin:8px 0;background:rgba(40,14,18,.6)}
+.slot img{width:56px;height:56px;flex:0 0 56px}
+.modeBtn.on{border-color:var(--gold);color:var(--gold)}
+.visBtn.on{border-color:var(--gold);color:var(--gold)}
+.setting{display:flex;align-items:center;gap:12px;margin:14px 0}
+.setting>span{flex:0 0 160px;color:var(--bone)}
+.setting input[type=range]{flex:1}
+.setting select{flex:1;font:inherit;padding:6px;background:#1a0e10;color:var(--ink);border:1px solid #5a3a40;border-radius:4px}
+.numbox{width:76px;font:inherit;padding:6px;background:#1a0e10;color:var(--ink);border:1px solid #5a3a40;border-radius:4px;text-align:center}
+.instr-btn{position:fixed;left:16px;bottom:16px;margin:0;font-size:14px;background:rgba(10,5,7,.7);border-color:#5a3a40}
+.notice{position:fixed;top:120px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(18,9,11,.92);border:1px solid #a3343f;padding:8px 16px;color:var(--bone);pointer-events:none}
+/* ---- Mobile controls: only on the Mobile platform, only during a match ---- */
+body.mobile #c{touch-action:none}
+#mobileHud{position:fixed;inset:0;pointer-events:none;z-index:20}
+#mobileHud .mbtn{position:absolute;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;padding:0;border-radius:50%;background:rgba(30,12,16,.55);border:2px solid #7a5560;display:flex;align-items:center;justify-content:center;color:#e9dcc9;opacity:.5}
+#mobileHud .mbtn svg{width:58%;height:58%}
+#joyBase{left:18px;bottom:18px;width:130px;height:130px}
+#joyKnob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(233,220,201,.7);pointer-events:none}
+#btnM1{right:34px;bottom:150px;width:112px;height:112px}
+#btnAbility{right:26px;bottom:26px;width:88px;height:88px;color:#dcae5a}
+body.mobile .moves .move{pointer-events:auto;height:44px;font-size:11px}
+body.mobile .ult-track{pointer-events:auto}
+body.mobile #mobMoves{position:absolute;width:40vw}
+body.mobile #mobUlt,body.mobile #mobAb{position:absolute;width:40vw}
+#mobileHud.in-stage{position:absolute;z-index:1}
+#mobileHud.in-stage #mobMoves,#mobileHud.in-stage #mobUlt,#mobileHud.in-stage #mobAb{pointer-events:auto}
+#mobileHud .sel{outline:2px dashed #dcae5a;outline-offset:4px}
+/* Button Configuration: the editor fills the screen, so the preview is the real phone screen */
+#sLayout.on{display:block;position:fixed;inset:0;z-index:40;background:#100809;overflow:hidden}
+#layoutStage{position:absolute;inset:0;width:auto;height:auto;aspect-ratio:auto;margin:0;border:0;border-radius:0;background:linear-gradient(#2a1418,#120a0c);overflow:hidden;touch-action:none}
+#sLayout .panel{position:absolute;left:8px;right:8px;bottom:8px;max-width:none;width:auto;margin:0;max-height:52vh;overflow:auto;background:rgba(18,9,11,.93);border:1px solid #5a3a40;border-radius:10px;padding:10px 14px}
+#sLayout .panel h2{margin:0 0 2px;font-size:18px}
+#sLayout .panel .note{margin:0 0 6px;font-size:12px}
+#sLayout .setting{margin:4px 0}
+/* Full screen button: only on the Mobile platform */
+#bFullscreen{display:none}
+body.mobile #bFullscreen{display:inline-block}
+/* Short screens (phones in landscape): keep the Choose Character buttons clear of the name */
+@media (max-height:600px){
+  .choose-name{top:6px;font-size:clamp(22px,4.5vw,34px)}
+  #sSelect{padding-bottom:8px}
+  .choose-stack{gap:5px}
+  .arrow{font-size:22px;padding:4px 16px}
+  .price{font-size:16px;min-width:140px}
+  .stats-panel{max-height:26vh;overflow:auto}
+  #sSelect .note{display:none}
+}
+body.ffa .bar.r{display:none}
+.choose-soon{position:fixed;top:78px;left:0;right:0;margin:0;text-align:center;color:#e9dcc9;font-size:16px;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="bgWrap" style="display:none"></div>
+
+<div id="hud">
+  <div class="bar"><span><span id="youLabel">You</span> <i class="note" id="metalTag"></i></span><div class="track"><div class="fill" id="hpP"></div></div><div class="track thin" id="mTrackP"><div class="fill meter" id="mP"></div></div></div>
+  <div class="mid"><span id="roundTxt"></span><b id="moneyTxt"></b><div class="note" id="abil"></div><div class="note" id="lives"></div>
+    <div><button class="ghost" id="bLock">Shift lock: off</button><button class="ghost" id="bLeave">Leave</button></div>
+  </div>
+  <div class="bar r"><span id="oppLabel">Opponent</span><div class="track"><div class="fill" id="hpB"></div></div><div class="track thin" id="mTrackB"><div class="fill meter" id="mB"></div></div></div>
+</div>
+<div id="lock" style="display:none;position:fixed;left:50%;bottom:200px;transform:translateX(-50%);width:min(360px,80vw);pointer-events:none;text-align:center">
+  <div style="position:relative;height:18px;border:2px solid #dcae5a;background:#1a0e10">
+    <div style="position:absolute;top:0;bottom:0;left:42%;width:16%;background:rgba(220,174,90,.6)"></div>
+    <div id="lockMark" style="position:absolute;top:-5px;bottom:-5px;width:6px;margin-left:-3px;background:#fff"></div>
+  </div>
+  <div class="note" style="margin-top:6px">Press E when the marker is in the gold zone</div>
+</div>
+<div id="mateBar" class="fixedbar fixedbar-l" style="display:none"><span id="mateLabel">Teammate</span><div class="track"><div class="fill" id="hpM"></div></div></div>
+<div id="enemy2Bar" class="fixedbar fixedbar-r" style="display:none"><span id="enemy2Label">Opponent 2</span><div class="track"><div class="fill" id="hpE2"></div></div></div>
+<div id="notice" class="notice" style="display:none"></div>
+<div id="hudBottom" class="hud-bottom" style="display:none">
+  <div class="ult-wrap" id="mobUlt"><div class="ult-label" id="ultLabel"></div><div class="ult-track"><div class="ult-fill" id="ultFill"></div></div></div>
+  <div class="ab-wrap" id="mobAb"><div class="ab-label" id="abLabel"></div><div class="ab-track"><div class="ab-fill" id="abFill"></div></div></div>
+  <div class="moves" id="mobMoves">
+    <div class="move"><b class="mfill" id="mv1fill"></b><span id="mv1name">Move 1</span></div>
+    <div class="move"><b class="mfill" id="mv2fill"></b><span id="mv2name">Move 2</span></div>
+    <div class="move"><b class="mfill" id="mv3fill"></b><span id="mv3name">Move 3</span></div>
+    <div class="move"><b class="mfill" id="mv4fill"></b><span id="mv4name">Move 4</span></div>
+  </div>
+</div>
+
+<div id="mobileHud" style="display:none">
+  <div id="joyBase" class="mbtn"><div id="joyKnob"></div></div>
+  <button id="btnM1" class="mbtn" aria-label="Basic attack (M1)"><svg viewBox="0 0 64 64" aria-hidden="true"><g fill="currentColor"><rect x="16" y="24" width="34" height="28" rx="9"/><rect x="16" y="12" width="9" height="16" rx="4.5"/><rect x="27" y="10" width="9" height="18" rx="4.5"/><rect x="38" y="11" width="9" height="17" rx="4.5"/><rect x="48" y="14" width="8" height="14" rx="4"/><rect x="8" y="30" width="12" height="16" rx="6"/></g></svg></button>
+  <button id="btnAbility" class="mbtn" aria-label="Ability"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon fill="currentColor" points="32.0,4.0 39.1,23.3 59.6,24.0 43.4,36.7 49.0,56.5 32.0,45.0 15.0,56.5 20.6,36.7 4.4,24.0 24.9,23.3"/></svg></button>
+</div>
+
+<section class="screen black" id="sPlatform"><div class="panel">
+  <h2>Are you playing on mobile, PC, or console?</h2>
+  <p>Your choice is remembered on this browser. You can change it from the home screen.</p>
+  <div class="row"><button class="platBtn" data-plat="mobile">Mobile</button><button class="platBtn" data-plat="pc">PC</button><button class="platBtn" data-plat="console">Console</button></div>
+</div></section>
+
+<section class="screen home" id="sHome">
+  <div class="brand"><img class="brand-word" src="ui/wordmark.png" alt="Kymera"><img class="brand-logo" src="ui/logo.png" alt="Kymera logo"></div>
+  <div class="home-col">
+    <h1 class="home-title">Kymera Battlegrounds</h1>
+    <button class="home-btn" id="bPlay">Play</button>
+    <button class="home-btn" id="bChoose">Choose Character</button>
+    <button class="home-btn" id="bSettings">Settings</button>
+  </div>
+  <button class="instr-btn" id="bInstr">Instructions</button>
+  <button class="platform-change" id="bPlatform">Platform: <span id="platLabel">PC</span> (change)</button>
+</section>
+
+<section class="screen" id="sInstr"><div class="panel">
+  <h2>Instructions</h2>
+  <h3>Controls</h3>
+  <div id="instrControls"></div>
+  <h3>Matches</h3>
+  <p>A match is three rounds, and each round is a fight to the death. Each round you win earns 5 K Serum, and winning the match earns a 20 K Serum bonus.</p>
+  <p>In 2v2, a side wins a round when the other side is out.</p>
+  <p>In Free For All, 3 to 10 players fight, and the last player standing wins the round. That pays 5 K Serum for each player in the room, and every kill pays 5 K Serum.</p>
+  <div class="row"><button class="ghost" data-go="sHome">Back</button></div>
+</div></section>
+
+<section class="screen" id="sPlay"><div class="panel">
+  <h2>Play</h2>
+  <div class="row" style="flex-direction:column;align-items:stretch;gap:12px">
+    <button class="home-btn" id="bBattle">Battle</button>
+    <button class="home-btn" id="bWaves">Waves</button>
+  </div>
+  <div class="row"><button class="ghost" data-go="sHome">Back</button></div>
+</div></section>
+
+<section class="screen" id="sWaves"><div class="panel">
+  <h2>Waves</h2>
+  <p>Coming soon.</p>
+  <div class="row"><button class="ghost" data-go="sPlay">Back to Play</button></div>
+</div></section>
+
+<section class="screen" id="sSettings"><div class="panel">
+  <h2>Settings</h2>
+  <div class="row" style="flex-direction:column;align-items:stretch;gap:12px">
+    <button class="home-btn" id="bSetAccount">Account</button>
+    <button class="home-btn" id="bSetKeys">Key Binds</button>
+  <button class="ghost" id="bFullscreen">Full screen</button>
+    <button class="home-btn" id="bSetAudio">Audio &amp; Mouse</button>
+  </div>
+  <div class="row"><button class="ghost" data-go="sHome">Back</button></div>
+</div></section>
+
+<section class="screen" id="sAudio"><div class="panel">
+  <h2>Audio &amp; Mouse</h2>
+  <div class="setting"><span>Effect volume</span><input type="range" id="fxSlider" min="0" max="100" step="1"><input type="number" id="fxNum" class="numbox" min="0" max="100"></div>
+  <div class="setting"><span>Background music</span><input type="range" id="musicSlider" min="0" max="100" step="1"><input type="number" id="musicNum" class="numbox" min="0" max="100"></div>
+  <div class="setting"><span>Music track</span><select id="trackSelect"><option value="none">None</option></select></div>
+  <div class="setting"><span id="sensLabel">Mouse sensitivity</span><input type="range" id="sensSlider" min="1" max="100" step="1"><input type="number" id="sensNum" class="numbox" min="1" max="100"></div>
+  <p class="note">Sound effects and music are not added yet. Sensitivity works now. These settings are saved for <b id="audioPlat">PC</b> only, and Mobile keeps its own.</p>
+  <div class="row"><button class="ghost" data-go="sSettings">Back</button></div>
+</div></section>
+
+<section class="screen" id="sSelect"><div class="choose-stack">
+  <div class="row" style="margin:0;justify-content:center;align-items:center;gap:14px"><button class="arrow" id="csPrev">&lt;</button><span class="price" id="csPrice"></span><button class="arrow" id="csNext">&gt;</button></div>
+  <button id="csAction">Select</button>
+  <button class="stats-toggle" id="csToggle"><span>Stats</span><span id="csCaret">^</span></button>
+  <div class="stats-panel" id="csStats" style="display:none"></div>
+  <p class="note" id="csMsg"></p>
+  <button class="ghost" id="csUnlock">Unlock all (testing)</button>
+  <button class="ghost" data-go="sHome">Back</button>
+</div><h2 class="choose-name" id="csName">Choose Character</h2><p class="choose-soon" id="csSoon"></p></section>
+
+<section class="screen" id="sKeys"><div class="panel">
+  <h2>Key Binds</h2>
+  <p>Device: <b id="kbDevice" style="color:var(--bone)">PC</b></p>
+  <div id="kbRows"></div>
+  <p class="note" id="kbMobile" style="display:none">Mobile key binds: coming soon.</p>
+  <p class="note" id="kbMsg"></p>
+  <div class="row"><button id="kbSave">Save</button><button class="ghost" id="kbReset">Reset to defaults</button><button class="ghost" data-go="sSettings">Back</button></div>
+</div></section>
+
+<section class="screen" id="sAccount"><div class="panel">
+  <h2>Account</h2>
+  <div id="acctGuest">
+    <p>You are playing as a guest. Log in or register to save your K Serum, Kymera, and wins.</p>
+    <input id="accName" maxlength="16" placeholder="Username" style="width:100%">
+    <p class="note" id="accNameMsg"></p>
+    <input id="accPass" type="password" placeholder="Password (6+ characters)" style="width:100%">
+    <div class="row"><button id="accLogin">Log in</button><button id="accRegister">Register</button></div>
+  </div>
+  <div id="acctUser" style="display:none">
+    <p>Logged in as <b id="accWho" style="color:var(--bone)"></b></p>
+    <p>K Serum: <b id="accKs" style="color:var(--gold)"></b></p>
+    <p>Wins: <b id="accWins"></b> · Losses: <b id="accLosses"></b> · Win rate: <b id="accRate"></b></p>
+    <p>Title: <b id="accTitles"></b></p>
+    <p>Kymera owned: <b id="accOwned"></b></p>
+    <p>Favorite Kymera: <select id="accFav" style="font:inherit;padding:6px"></select> <button class="ghost" id="accFavSave">Save</button></p>
+    <p>Send K Serum to another player:</p>
+    <div class="row" style="margin-top:0"><input id="giftTo" maxlength="16" placeholder="Username"><input id="giftAmt" type="number" min="1" placeholder="Amount" style="width:110px"><button id="giftBtn">Send</button></div>
+    <p class="note" id="giftMsg"></p>
+    <div class="row"><button class="ghost" id="goLeaders">Leaderboards</button><button class="ghost" id="goHistory">Match history</button><button class="ghost" id="goAdmin" style="display:none">Owner admin</button><button class="ghost" id="accLogout">Log out</button></div>
+  </div>
+  <p class="note" id="acctMsg"></p>
+  <div class="row"><button class="ghost" data-go="sFind">Find a player</button></div>
+  <div class="row"><button class="ghost" data-go="sTitles">Titles</button></div>
+  <div class="row"><button class="ghost" data-go="sSettings">Back</button></div>
+</div></section>
+
+<section class="screen" id="sLayout"><div id="layoutStage"></div><div class="panel">
+  <h2>Button Configuration</h2>
+  <p class="note">Drag a button to move it. Tap one to choose it, then change its size. Changes save as you make them.</p>
+  <div class="setting"><span id="layoutSelName">Tap a button to choose it</span><input type="range" id="layoutSizeSlider" min="60" max="160" step="1" disabled><input type="number" id="layoutSizeNum" class="numbox" min="60" max="160" disabled></div>
+  <div class="setting"><span>Button opacity</span><input type="range" id="layoutOpSlider" min="10" max="100" step="1"><input type="number" id="layoutOpNum" class="numbox" min="10" max="100"></div>
+  <p class="note" id="layoutMsg"></p>
+  <div class="row"><button class="ghost" id="layoutReset">Reset to default</button><button id="layoutSave">Save</button><button class="ghost" data-go="sSettings">Back</button></div>
+</div></section>
+
+<section class="screen" id="sTitles"><div class="panel">
+  <h2>Titles</h2>
+  <p class="note" id="titlesNote"></p>
+  <div id="titlesList"></div>
+  <p class="note" id="titlesMsg"></p>
+  <div class="row"><button class="ghost" data-go="sAccount">Back</button></div>
+</div></section>
+
+<section class="screen" id="sFind"><div class="panel">
+  <h2>Find a player</h2>
+  <div class="row" style="margin-top:0"><input id="findName" maxlength="16" placeholder="Username" style="flex:1"><button id="bFindGo">Search</button></div>
+  <p class="note" id="findMsg">Type part of a username, then press Search.</p>
+  <div id="findList"></div>
+  <div class="row"><button class="ghost" data-go="sAccount">Back</button></div>
+</div></section>
+
+<section class="screen" id="sProfile"><div class="panel">
+  <h2 id="profTitle">Player</h2>
+  <div id="profBody"></div>
+  <div class="row"><button class="ghost" data-go="sFind">Back to search</button></div>
+</div></section>
+
+<section class="screen" id="sLobby"><div class="panel">
+  <h2>Battle</h2>
+  <p>Playing as <b id="chosenName" style="color:var(--bone)">Xeno</b>. <span class="note" id="connNote">Connecting...</span></p>
+  <div class="card"><div><b>Create Room</b><span class="note">Pick a mode and map, then wait for a friend.</span></div><button id="bCreateRoom" disabled>Create</button></div>
+  <div class="card"><div><b>Join Room</b><span class="note">Enter the code your friend gave you.</span></div><div class="row" style="margin:0"><input id="code" maxlength="5" placeholder="CODE"><button id="bJoin" disabled>Join</button></div></div>
+  <div class="card"><div><b>Join Random</b><span class="note">Join the first open public room of that size, or start one.</span></div><div class="row" style="margin:0"><button id="bRand1" disabled>Random 1v1</button><button id="bRand2" disabled>Random 2v2</button><button id="bRandFfa" disabled>Random Free For All</button></div></div>
+  <p class="note" id="lobbyMsg"></p>
+  <div class="row"><button class="ghost" data-go="sPlay">Back</button></div>
+</div></section>
+
+<section class="screen" id="sCreate"><div class="panel">
+  <h2>Create Room</h2>
+  <p>Mode</p>
+  <div class="row"><button class="ghost modeBtn on" data-mode="1v1">1v1</button><button class="ghost modeBtn" data-mode="2v2">2v2</button><button class="ghost modeBtn" data-mode="ffa">Free For All</button></div>
+  <p>Map</p>
+  <div class="row"><button class="ghost mapBtn on" data-map="qvx">QVX (blue)</button><button class="ghost mapBtn" data-map="imira">Last Stand for Imira (red)</button></div>
+  <p>Visibility</p>
+  <div class="row"><button class="ghost visBtn on" data-vis="private">Private (code only)</button><button class="ghost visBtn" data-vis="public">Public (Join Random)</button></div>
+  <div class="row"><button id="bCreateGo">Create room</button><button class="ghost" data-go="sLobby">Back</button></div>
+  <p class="note" id="createMsg"></p>
+</div></section>
+
+<section class="screen" id="sWait"><div class="panel" style="width:min(640px,100%)">
+  <h2>Waiting Room</h2>
+  <p>Room code</p>
+  <div class="code" id="lobbyCode"></div>
+  <p>Map: <b id="waitMap" style="color:var(--bone)"></b> · Mode: <b id="waitMode" style="color:var(--bone)"></b></p>
+  <div class="cols">
+    <div id="blueCol"><h3 id="blueHead" style="color:#6fa8ff">Blue side</h3><div id="sideBlue"></div></div>
+    <div id="redCol"><h3 style="color:#ff6b6b">Red side</h3><div id="sideRed"></div></div>
+  </div>
+  <div class="row" style="margin-top:6px"><button class="ghost" id="bDetails">Details ^</button></div>
+  <div id="detailsBox" class="stats-panel" style="display:none">
+    <div>Mode: <b id="detMode" style="color:var(--bone)"></b></div>
+    <div>Map: <b id="detMap" style="color:var(--bone)"></b></div>
+    <div>Visibility: <b id="detVis" style="color:var(--bone)"></b></div>
+    <div>Blue side: <b id="detBlue" style="color:#6fa8ff"></b></div>
+    <div>Red side: <b id="detRed" style="color:#ff6b6b"></b></div>
+    <div class="note" id="detStatus"></div>
+  </div>
+  <p class="note" id="waitNote"></p>
+  <div class="row"><button class="ghost" id="bSwitch">Switch side</button><button id="bStart">Start match</button><button class="ghost" id="bCancel">Leave</button></div>
+</div></section>
+
+<section class="screen" id="sLeaders"><div class="panel">
+  <h2>Leaderboards</h2>
+  <div class="cols">
+    <div><h3>Most wins</h3><ol class="plist" id="lbWins"></ol></div>
+    <div><h3>Most K Serum</h3><ol class="plist" id="lbKs"></ol></div>
+  </div>
+  <p class="note">The top 3 on each board earn a title, such as "Rank 1 for Wins." A title is lost when someone passes you.</p>
+  <div class="row"><button class="ghost" data-go="sAccount">Back</button></div>
+</div></section>
+
+<section class="screen" id="sHistory"><div class="panel">
+  <h2>Match history</h2>
+  <h3>Matches</h3>
+  <ul class="plist" id="histMatches"></ul>
+  <h3>K Serum gifts</h3>
+  <ul class="plist" id="histGifts"></ul>
+  <div class="row"><button class="ghost" data-go="sAccount">Back</button></div>
+</div></section>
+
+<section class="screen" id="sAdmin"><div class="panel">
+  <h2>Owner admin</h2>
+  <p class="note">Only the owner account can see this page. Deleting an account is permanent.</p>
+  <ul class="plist" id="adminList"></ul>
+  <p class="note" id="adminMsg"></p>
+  <div class="row"><button class="ghost" data-go="sAccount">Back</button></div>
+</div></section>
+
+<section class="screen" id="sRound"><div class="panel">
+  <h2 id="roundTitle"></h2>
+  <p id="roundMsg"></p>
+</div></section>
+
+<section class="screen" id="sMatch"><div class="panel">
+  <h2 id="matchTitle"></h2>
+  <p id="matchMsg"></p>
+  <div class="row"><button id="bDone">Back to lobby</button></div>
+</div></section>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const ARENA_R = 10, LIMIT = 8.7;
+
+// Player id is stored in the browser so money stays with the same player on this device.
+let pid = localStorage.getItem('kymera_pid');
+if (!pid) { pid = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('kymera_pid', pid); }
+const socket = io({ auth: { pid } });
+
+let state = null, myIndex = 0, lastRound = 0, lastSpawn = 0, lobbyCode = '', oppTarget = null, oppTargets = {}, FIGHTERS = [], FIGHTER_TEAMS = [], FIGHTER_OUT = [], shiftLock = false, sendT = 0, T = 0;
+let P = null, O = null, proto = null;
+const keys = {};
+const view = { yaw: 0, pitch: 0.4, dist: 7.5 };
+const inFight = () => !!state && (state.phase === 'fight' || state.phase === 'between');
+
+// ---- Scene ----
+const renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x140a0c);
+scene.fog = new THREE.Fog(0x140a0c, 16, 38);
+const cam = new THREE.PerspectiveCamera(46, 1, 0.1, 100);
+scene.add(new THREE.HemisphereLight(0xffe2c8, 0x1a0808, 0.9));
+const sun = new THREE.DirectionalLight(0xfff1e0, 1.5);
+sun.position.set(5, 12, 7); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9 });
+sun.shadow.camera.updateProjectionMatrix();
+scene.add(sun);
+const glow = new THREE.PointLight(0xb3202f, 1.4, 24); glow.position.set(0, 3, -7); scene.add(glow);
+const floor = new THREE.Mesh(new THREE.CylinderGeometry(ARENA_R + 1.5, ARENA_R + 2, 1, 64), new THREE.MeshStandardMaterial({ color: 0x2b1b1e, roughness: 0.95 }));
+floor.position.y = -0.5; floor.receiveShadow = true; scene.add(floor);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(ARENA_R, 0.12, 8, 96), new THREE.MeshStandardMaterial({ color: 0x7a1b26, emissive: 0x4a0a12, roughness: 0.5 }));
+ring.rotation.x = Math.PI / 2; ring.position.y = 0.05; scene.add(ring);
+
+// ---- Kymera: each one loads its own model and textures from the server, once ----
+let menuMode = 'none', stand = null, csIndex = 0;
+const STAND_GAP = 5.5; // distance between stands along the row
+let chooseRow = null, chooseFighters = [], camChooseX = 0, camChooseZ = 0, chooseOrder = '';
+let chosen = 'xeno', catalog = {}, profile = { ks: 0, owned: ['xeno'] };
+const protos = {}, loading = {}, metalMats = {};
+const tl = new THREE.TextureLoader();
+let envMap = null;
+// A simple studio-style reflection for the metal form
+function makeEnv() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, '#20242a'); grad.addColorStop(0.45, '#c9d2da'); grad.addColorStop(0.55, '#f2f5f8'); grad.addColorStop(1, '#15171a');
+  g.fillStyle = grad; g.fillRect(0, 0, 512, 256);
+  g.fillStyle = 'rgba(255,255,255,0.9)'; g.fillRect(120, 60, 60, 110); g.fillRect(330, 80, 40, 90);
+  const t = new THREE.CanvasTexture(c);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  const pm = new THREE.PMREMGenerator(renderer);
+  const env = pm.fromEquirectangular(t).texture;
+  pm.dispose();
+  return env;
+}
+function loadKymera(id) {
+  if (protos[id]) return Promise.resolve(protos[id]);
+  if (loading[id]) return loading[id];
+  const base = 'kymera/' + id + '/';
+  const tex = (file, srgb) => { const t = tl.load(base + file); t.flipY = false; if (srgb) t.encoding = THREE.sRGBEncoding; return t; };
+  const normal = tex('normal.png');
+  const mat = new THREE.MeshStandardMaterial({ map: tex('base.jpg', true), normalMap: normal, roughnessMap: tex('rough.png'), metalnessMap: tex('metal.png'), roughness: 1, metalness: 1 });
+  if (catalog[id] && catalog[id].ability === 'metal') {
+    envMap = envMap || makeEnv();
+    metalMats[id] = new THREE.MeshStandardMaterial({ map: tex('metal/base.jpg', true), normalMap: normal, roughnessMap: tex('metal/rough.png'), metalnessMap: tex('metal/metal.png'), roughness: 1, metalness: 1, envMap, envMapIntensity: 1.4 });
+  }
+  loading[id] = new Promise((resolve, reject) => {
+    new THREE.GLTFLoader().load(base + 'model.glb', gltf => {
+      const wrap = new THREE.Group(); wrap.add(gltf.scene); wrap.updateMatrixWorld(true);
+      let box = new THREE.Box3().setFromObject(wrap);
+      gltf.scene.scale.setScalar(2.8 / (box.max.y - box.min.y));
+      wrap.updateMatrixWorld(true); box = new THREE.Box3().setFromObject(wrap);
+      gltf.scene.position.set(-(box.max.x + box.min.x) / 2, -box.min.y, -(box.max.z + box.min.z) / 2);
+      wrap.traverse(o => { if (o.isMesh) { o.material = mat; o.castShadow = true; o.receiveShadow = true; } });
+      protos[id] = wrap; resolve(wrap);
+    }, undefined, reject);
+  });
+  return loading[id];
+}
+function makeFighter(id, tint) {
+  const inner = protos[id].clone(true), root = new THREE.Group();
+  root.add(inner); scene.add(root);
+  const parts = [];
+  inner.traverse(o => { if (o.isMesh) { const mat = o.material.clone(); if (tint) mat.color.set(tint); o.material = mat; parts.push({ mesh: o, mat }); } });
+  const speed = catalog[id] ? catalog[id].speed : 4.2;
+  return { root, inner, punch: 0, cd: 0, speed, parts, metalMat: metalMats[id] || null, metal: false, auraG: null, auraBolts: null, auraT: 0, dashT: 0, dashDir: [0, 0] };
+}
+function setMetal(f, on) {
+  if (!f || !f.metalMat) return;
+  f.metal = on;
+  f.parts.forEach(p => { p.mesh.material = on ? f.metalMat : p.mat; });
+}
+let settingUp = false;
+let abil = { kind: null, cdLeft: 0, aura: false, tired: false, lockStart: 0, oppAura: false }, clockOffset = 0;
+const redMat = new THREE.MeshBasicMaterial({ color: 0xff1a2a });
+const blackMat = new THREE.MeshBasicMaterial({ color: 0x050505, depthTest: false });
+const hazeMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
+// Bolt anchor points: around the body, with extra bolts at each fist
+const BOLTS = [...Array(8)].map((_, i) => ({ at: new THREE.Vector3(Math.cos(i / 8 * Math.PI * 2) * 0.8, 1.4, Math.sin(i / 8 * Math.PI * 2) * 0.8), len: 0.9 }))
+  .concat([-1, 1].flatMap(s => [0, 1, 2, 3].map(() => ({ at: new THREE.Vector3(s * 0.95, 1.15, 0.3), len: 0.7 }))));
+function randomBolt(anchor, len) {
+  const pts = [anchor.clone()];
+  const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+  let p = anchor.clone();
+  for (let i = 0; i < 4; i++) {
+    dir.add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(1.1)).normalize();
+    p = p.clone().addScaledVector(dir, len / 4);
+    pts.push(p);
+  }
+  return new THREE.CatmullRomCurve3(pts);
+}
+function rebuildBolt(b) {
+  const curve = randomBolt(b.at, b.len);
+  b.outline.geometry.dispose(); b.core.geometry.dispose();
+  b.outline.geometry = new THREE.TubeGeometry(curve, 12, 0.07, 6, false);
+  b.core.geometry = new THREE.TubeGeometry(curve, 12, 0.035, 6, false);
+}
+function setAura(f, on) {
+  if (!f) return;
+  if (on && !f.auraG) {
+    const g = new THREE.Group();
+    const haze = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 12), hazeMat);
+    haze.position.set(0, 1.3, 0); g.add(haze);
+    f.auraBolts = BOLTS.map(b => {
+      const bolt = { at: b.at, len: b.len, outline: new THREE.Mesh(new THREE.BufferGeometry(), redMat), core: new THREE.Mesh(new THREE.BufferGeometry(), blackMat) };
+      bolt.core.renderOrder = 2;
+      g.add(bolt.outline, bolt.core);
+      rebuildBolt(bolt);
+      return bolt;
+    });
+    f.auraG = g; f.auraT = 0; f.root.add(g);
+  } else if (!on && f.auraG) {
+    f.root.remove(f.auraG);
+    f.auraG.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+    f.auraG = null; f.auraBolts = null;
+  }
+}
+function updateAura(f, dt) {
+  if (!f.auraG) return;
+  f.auraT -= dt;
+  if (f.auraT > 0) return;
+  f.auraT = 0.07;
+  f.auraBolts.forEach(rebuildBolt);
+}
+// Yellow outline around a fighter (used while CatClaw is protected after a respawn)
+function setShield(f, on) {
+  if (!f) return;
+  if (on && !f.shieldG) {
+    const g = f.inner.clone(true);
+    g.scale.multiplyScalar(1.06);
+    g.traverse(o => {
+      if (o.isMesh) {
+        o.material = new THREE.MeshBasicMaterial({ color: 0xffe600, side: THREE.BackSide });
+        o.castShadow = false; o.receiveShadow = false;
+      }
+    });
+    f.root.add(g);
+    f.shieldG = g;
+  } else if (!on && f.shieldG) {
+    f.root.remove(f.shieldG);
+    f.shieldG.traverse(o => { if (o.isMesh && o.material) o.material.dispose(); });
+    f.shieldG = null;
+  }
+}
+const removeFighter = f => { if (f) scene.remove(f.root); };
+async function previewKymera(id) {
+  await loadKymera(id);
+  removeFighter(P);
+  P = makeFighter(id);
+  FIGHTERS.forEach(f => { f.root.visible = false; });
+}
+async function ensureFighters(s) {
+  await Promise.all(s.players.map(q => loadKymera(q.char)));
+  removeFighter(P);
+  FIGHTERS.forEach(removeFighter);
+  FIGHTERS = s.players.map((q, i) => makeFighter(q.char, (i === s.index || q.team === s.team) ? undefined : 0x9fb4e8));
+  P = FIGHTERS[s.index];
+  FIGHTERS.forEach((f, i) => { if (f && i !== s.index) { f.label = makeNameLabel(s.players[i].name || 'Guest', s.mode === 'ffa' ? -1 : s.players[i].team); f.root.add(f.label); } });
+  O = FIGHTERS.find((f, i) => s.players[i].team !== s.team) || null;
+  oppTargets = {};
+}
+
+// ---- Name labels: every fighter except yourself. Blue side = blue, Red side = red ----
+function makeNameLabel(text, team) {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 128;
+  const g = c.getContext('2d');
+  g.font = 'bold 56px Georgia, "Times New Roman", serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.lineWidth = 10; g.strokeStyle = 'rgba(0,0,0,0.85)';
+  g.strokeText(text, 256, 64);
+  g.fillStyle = team === 0 ? '#4aa3ff' : team === 1 ? '#ff3b4a' : '#ecdfc7';
+  g.fillText(text, 256, 64);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+  sp.scale.set(2.6, 0.65, 1);
+  sp.position.set(0, 3.2, 0);
+  sp.renderOrder = 10;
+  return sp;
+}
+// Fallen fighters (2v2): the body stays on the floor. Its owner can still move an invisible ghost, and the camera follows the ghost.
+let ghost = null;
+function isFallen() { return !!state && (state.mode === '2v2' || state.mode === 'ffa') && (state.phase === 'fight' || state.phase === 'between') && !!FIGHTER_OUT[myIndex]; }
+function ghostPos() { if (!ghost) ghost = { x: P.root.position.x, z: P.root.position.z }; return ghost; }
+function clampGhost(g) { const r = Math.hypot(g.x, g.z), R = state && state.mode === 'ffa' ? 17.4 : 8.7; if (r > R) { g.x *= R / r; g.z *= R / r; } }
+function cameraFocus() { if (isFallen()) return ghostPos(); ghost = null; return P.root.position; }
+// Names in the top bars. Guests show their character's initials. CatClaw shows his lives.
+const INITIALS = { xeno: 'X', cc: 'CC', tm: 'TM' };
+function hudLabel(q) {
+  const guest = q.name === 'Guest';
+  let t = guest ? 'Guest (' + (INITIALS[q.char] || q.char) + ')' : q.name;
+  if (q.livesMax > 1) t += (guest ? '' : ' ') + '(Lives: ' + q.livesLeft + '/' + q.livesMax + ')';
+  return t;
+}
+// ---- Fallen fighters (2v2): someone who is out lies on the floor, and their name label hides ----
+function updateLieDown(dt) {
+  FIGHTERS.forEach((f, i) => {
+    if (!f) return;
+    const fallen = !!state && (state.mode === '2v2' || state.mode === 'ffa') && (state.phase === 'fight' || state.phase === 'between') && !!FIGHTER_OUT[i];
+    const target = fallen ? 1 : 0;
+    f.down = (f.down || 0) + (target - (f.down || 0)) * Math.min(1, dt * 4);
+    f.inner.rotation.x = -f.down * Math.PI / 2;
+    f.inner.position.y = f.down * 0.3;
+    if (f.label) f.label.visible = f.down < 0.05;
+  });
+}
+// ---- Input ----
+// Keys come from the key bind settings. Arrows and Shift are fixed.
+const joy = { x: 0, y: 0 }; // mobile joystick push: x is right, y is forward, each -1 to 1
+const held = {};
+addEventListener('keydown', e => {
+  if (listening) return;
+  if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
+  keys[e.code] = true;
+  const a = bindLookup[e.code];
+  if (a) { held[a] = true; if (!e.repeat && inFight()) onAction(a); }
+  if (!e.repeat && inFight() && (e.code === 'ShiftLeft' || e.code === 'ShiftRight')) toggleLock();
+});
+addEventListener('keyup', e => {
+  keys[e.code] = false;
+  const a = bindLookup[e.code];
+  if (a) held[a] = false;
+});
+function onAction(a) {
+  if (a === 'ability') socket.emit('special');
+  if (a === 'm1') punch();
+  if (a === 'ult' && abil.ultFill >= 1) ultNoteUntil = Date.now() + 1500;
+  // Moves 1-4 are coming soon
+}
+
+const canvas = $('c');
+let drag = false, dragId = -1, lx = 0, ly = 0;
+canvas.addEventListener('pointerdown', e => {
+  if (!drag) { drag = true; dragId = e.pointerId; lx = e.clientX; ly = e.clientY; }
+  const ma = onMobile() ? null : bindLookup['Mouse' + e.button];
+  if (ma) { held[ma] = true; if (inFight()) onAction(ma); }
+});
+addEventListener('pointerup', e => {
+  if (e.pointerId === dragId) drag = false;
+  const mu = bindLookup['Mouse' + e.button];
+  if (mu) held[mu] = false;
+});
+addEventListener('pointercancel', e => { if (e.pointerId === dragId) drag = false; }); // a touch the phone takes back ends the camera drag
+// Mouse look is inverted. With shift lock on, the mouse is captured and moves the camera without holding a button.
+addEventListener('pointermove', e => {
+  if (document.pointerLockElement === canvas) {
+    view.yaw -= e.movementX * 0.006 * mouseScale();
+    view.pitch = clamp(view.pitch + e.movementY * 0.004 * mouseScale(), 0.05, 1.3);
+    return;
+  }
+  if (!drag || e.pointerId !== dragId) return;
+  view.yaw -= (e.clientX - lx) * 0.006 * mouseScale();
+  view.pitch = clamp(view.pitch + (e.clientY - ly) * 0.004 * mouseScale(), 0.05, 1.3);
+  lx = e.clientX; ly = e.clientY;
+});
+document.addEventListener('pointerlockchange', () => {
+  if (!document.pointerLockElement && shiftLock) {
+    shiftLock = false;
+    $('bLock').textContent = 'Shift lock: off';
+  }
+});
+canvas.addEventListener('wheel', e => { view.dist = clamp(view.dist + e.deltaY * 0.01, 3, 14); e.preventDefault(); }, { passive: false });
+
+// ---- Mobile controls: joystick, M1, ability, move squares, and the Ultimate bar. They run the same actions as the keys. ----
+const onMobile = () => platformNow() === 'mobile';
+const joyBase = $('joyBase'), joyKnob = $('joyKnob');
+let joyId = null;
+function joyMove(e) {
+  const r = joyBase.getBoundingClientRect();
+  const R = r.width / 2, cx = r.left + R, cy = r.top + r.height / 2;
+  let dx = e.clientX - cx, dy = e.clientY - cy;
+  const d = Math.hypot(dx, dy);
+  if (d > R) { dx *= R / d; dy *= R / d; }
+  joy.x = dx / R;
+  joy.y = -dy / R; // pushing up is forward
+  joyKnob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+}
+function joyEnd() { joyId = null; joy.x = 0; joy.y = 0; joyKnob.style.transform = ''; }
+joyBase.addEventListener('pointerdown', e => { if (layoutOpen) return; e.preventDefault(); joyId = e.pointerId; joyBase.setPointerCapture(e.pointerId); joyMove(e); });
+joyBase.addEventListener('pointermove', e => { if (e.pointerId === joyId) joyMove(e); });
+joyBase.addEventListener('pointerup', e => { if (e.pointerId === joyId) joyEnd(); });
+joyBase.addEventListener('pointercancel', e => { if (e.pointerId === joyId) joyEnd(); });
+$('btnM1').addEventListener('pointerdown', e => { e.preventDefault(); if (onMobile() && inFight()) onAction('m1'); });
+$('btnAbility').addEventListener('pointerdown', e => { e.preventDefault(); if (onMobile() && inFight()) onAction('ability'); });
+document.querySelectorAll('.moves .move').forEach((el, i) => el.addEventListener('pointerdown', () => { if (onMobile() && inFight()) onAction('move' + (i + 1)); }));
+$('ultFill').parentElement.addEventListener('pointerdown', () => { if (onMobile() && inFight()) onAction('ult'); });
+
+// ---- Button Configuration (Mobile only): where each button sits and how big it is. Saved per platform, like key binds. ----
+const LAYOUT_ITEMS = [
+  { id: 'joy', el: 'joyBase', name: 'Joystick', opacity: true },
+  { id: 'm1', el: 'btnM1', name: 'M1 (fist)', opacity: true },
+  { id: 'ab', el: 'btnAbility', name: 'Ability (star)', opacity: true },
+  { id: 'moves', el: 'mobMoves', name: 'Move squares', opacity: true },
+  { id: 'ult', el: 'mobUlt', name: 'Ultimate bar' },
+  { id: 'abbar', el: 'mobAb', name: 'Ability bar' },
+];
+// Positions are the top-left corner as a percentage of the screen, so a layout fits any phone. Size is a percentage too.
+const LAYOUT_DEFAULT = {
+  opacity: 50,
+  items: {
+    joy: { x: 2, y: 60, s: 100 }, m1: { x: 82, y: 35, s: 100 }, ab: { x: 86, y: 72, s: 100 },
+    moves: { x: 30, y: 83, s: 100 }, ult: { x: 30, y: 70, s: 100 }, abbar: { x: 30, y: 77, s: 100 },
+  },
+};
+const layoutCopy = o => JSON.parse(JSON.stringify(o));
+function mergeLayout(s) {
+  const out = layoutCopy(LAYOUT_DEFAULT);
+  if (!s || typeof s !== 'object') return out;
+  const num = (v, a, b, d) => (Number.isFinite(Number(v)) ? Math.max(a, Math.min(b, Number(v))) : d);
+  out.opacity = num(s.opacity, 10, 100, out.opacity);
+  LAYOUT_ITEMS.forEach(it => {
+    const src = s.items && s.items[it.id];
+    if (!src) return;
+    const d = out.items[it.id];
+    out.items[it.id] = { x: num(src.x, 0, 100, d.x), y: num(src.y, 0, 100, d.y), s: num(src.s, 60, 160, d.s) };
+  });
+  return out;
+}
+let layout = layoutCopy(LAYOUT_DEFAULT), layoutOpen = false, layoutSel = null, layoutDrag = null, layoutTimer = null;
+const layoutEl = it => $(it.el);
+function applyLayout() {
+  const mobile = onMobile();
+  if (!mobile) { ['mobMoves', 'mobUlt', 'mobAb'].forEach(id => { $(id).style.cssText = ''; }); return; }
+  LAYOUT_ITEMS.forEach(it => {
+    const el = layoutEl(it), p = layout.items[it.id];
+    el.style.left = p.x + '%'; el.style.top = p.y + '%';
+    el.style.right = 'auto'; el.style.bottom = 'auto';
+    el.style.transformOrigin = '0 0'; el.style.transform = 'scale(' + p.s / 100 + ')';
+    el.style.opacity = it.opacity ? layout.opacity / 100 : '';
+  });
+}
+// The bottom HUD pieces live in the mobile overlay (so they can be moved) and go back to the bottom bar on PC
+function placeHudItems(p) {
+  if (p === 'mobile') {
+    const m = $('mobileHud');
+    m.appendChild($('mobMoves')); m.appendChild($('mobUlt')); m.appendChild($('mobAb'));
+  } else {
+    const hud = $('hudBottom');
+    hud.appendChild($('mobUlt')); hud.appendChild($('mobAb')); hud.appendChild($('mobMoves'));
+  }
+  applyLayout();
+}
+function saveLayout(now) {
+  try { localStorage.setItem('kymera_layout_mobile', JSON.stringify(layout)); } catch (e) {}
+  clearTimeout(layoutTimer);
+  const snap = layoutCopy(layout);
+  const send = () => { if (profile.name) socket.emit('setLayout', { platform: 'mobile', layout: snap }); };
+  if (now) send(); else layoutTimer = setTimeout(send, 400);
+}
+function loadLayoutLocal() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem('kymera_layout_mobile')); } catch (e) {}
+  if (profile.layouts && profile.layouts.mobile) s = profile.layouts.mobile;
+  layout = mergeLayout(s);
+  applyLayout();
+}
+function openLayout() {
+  layoutOpen = true; layoutSel = null;
+  const hud = $('mobileHud');
+  $('layoutStage').appendChild(hud);
+  hud.classList.add('in-stage'); hud.style.display = 'block';
+  applyLayout(); renderLayoutPanel();
+  $('layoutOpSlider').value = layout.opacity; $('layoutOpNum').value = layout.opacity;
+  $('layoutMsg').textContent = '';
+}
+function closeLayout() {
+  if (!layoutOpen) return;
+  layoutOpen = false; layoutSel = null; layoutDrag = null;
+  const hud = $('mobileHud');
+  document.body.appendChild(hud);
+  hud.classList.remove('in-stage'); hud.style.display = 'none';
+  LAYOUT_ITEMS.forEach(it => layoutEl(it).classList.remove('sel'));
+}
+function moveLayoutItem(e) {
+  const st = $('layoutStage').getBoundingClientRect();
+  const r = layoutDrag.el.getBoundingClientRect();
+  const wPct = r.width / st.width * 100, hPct = r.height / st.height * 100;
+  let x = (e.clientX - layoutDrag.dx - st.left) / st.width * 100;
+  let y = (e.clientY - layoutDrag.dy - st.top) / st.height * 100;
+  x = Math.max(0, Math.min(100 - wPct, x));
+  y = Math.max(0, Math.min(100 - hPct, y));
+  const p = layout.items[layoutDrag.id];
+  p.x = Math.round(x * 10) / 10; p.y = Math.round(y * 10) / 10;
+  applyLayout();
+}
+LAYOUT_ITEMS.forEach(it => {
+  const el = layoutEl(it);
+  el.addEventListener('pointerdown', e => {
+    if (!layoutOpen) return;
+    e.preventDefault(); e.stopPropagation();
+    layoutSel = it.id; renderLayoutPanel();
+    const r = el.getBoundingClientRect();
+    layoutDrag = { id: it.id, el, pid: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top };
+    if (el.setPointerCapture) el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', e => { if (layoutDrag && layoutDrag.id === it.id && e.pointerId === layoutDrag.pid) moveLayoutItem(e); });
+  const end = e => { if (layoutDrag && layoutDrag.id === it.id && e.pointerId === layoutDrag.pid) { layoutDrag = null; saveLayout(false); } };
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+});
+function renderLayoutPanel() {
+  const it = LAYOUT_ITEMS.find(i => i.id === layoutSel);
+  $('layoutSelName').textContent = it ? it.name : 'Tap a button to choose it';
+  const size = it ? layout.items[it.id].s : 100;
+  $('layoutSizeSlider').disabled = !it; $('layoutSizeNum').disabled = !it;
+  $('layoutSizeSlider').value = size; $('layoutSizeNum').value = size;
+  LAYOUT_ITEMS.forEach(i => layoutEl(i).classList.toggle('sel', i.id === layoutSel));
+}
+function setLayoutSize(v) {
+  if (!layoutSel) return;
+  layout.items[layoutSel].s = Math.max(60, Math.min(160, Math.round(v)));
+  applyLayout(); renderLayoutPanel(); saveLayout(false);
+}
+function setLayoutOpacity(v) {
+  layout.opacity = Math.max(10, Math.min(100, Math.round(v)));
+  $('layoutOpSlider').value = layout.opacity; $('layoutOpNum').value = layout.opacity;
+  applyLayout(); saveLayout(false);
+}
+$('layoutSizeSlider').oninput = () => setLayoutSize(Number($('layoutSizeSlider').value));
+$('layoutSizeNum').onchange = () => { const v = Math.round(Number($('layoutSizeNum').value)); setLayoutSize(Number.isFinite(v) ? v : 100); };
+$('layoutOpSlider').oninput = () => setLayoutOpacity(Number($('layoutOpSlider').value));
+$('layoutOpNum').onchange = () => { const v = Math.round(Number($('layoutOpNum').value)); setLayoutOpacity(Number.isFinite(v) ? v : layout.opacity); };
+$('layoutSave').onclick = () => { saveLayout(true); $('layoutMsg').textContent = profile.name ? 'Saved to your account.' : 'Saved on this device. Log in to save to your account.'; };
+$('layoutReset').onclick = () => {
+  layout = layoutCopy(LAYOUT_DEFAULT); applyLayout(); renderLayoutPanel();
+  $('layoutOpSlider').value = layout.opacity; $('layoutOpNum').value = layout.opacity;
+  saveLayout(true); $('layoutMsg').textContent = 'Reset to the default layout.';
+};
+loadLayoutLocal();
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+function toggleLock() {
+  shiftLock = !shiftLock;
+  $('bLock').textContent = 'Shift lock: ' + (shiftLock ? 'on' : 'off');
+  if (shiftLock && platformNow() === 'pc') { try { canvas.requestPointerLock(); } catch (e) {} }
+  else if (document.pointerLockElement) document.exitPointerLock();
+}
+$('bLock').onclick = toggleLock;
+
+function punch() {
+  // The server ignores punches from a fallen fighter or a shielded (just respawned) one, so do not animate them either
+  const mine = state && (state.players || []).find(q => q.index === myIndex);
+  if (!P || P.cd > 0 || isFallen() || (mine && mine.shielded)) return;
+  P.cd = abil.tired ? 1.0 : 0.45; P.punch = 0.28;
+  socket.emit('punch');
+}
+
+// ---- Console (controller). The standard Gamepad layout: the sticks move and look, and the buttons act. ----
+const PAD = { dead: 0.15, look: 2.6, lookPitch: 1.6 };
+let joyFromPad = false;
+const padWasDown = {};
+const stickOf = v => (Math.abs(v) < PAD.dead ? 0 : v);
+function activePad() {
+  if (platformNow() !== 'console' || typeof navigator.getGamepads !== 'function') return null;
+  const pads = navigator.getGamepads() || [];
+  for (let i = 0; i < pads.length; i++) if (pads[i] && pads[i].connected !== false) return pads[i];
+  return null;
+}
+function pollGamepad(dt) {
+  const g = activePad();
+  if (!g) { if (joyFromPad) { joy.x = 0; joy.y = 0; joyFromPad = false; } return; }
+  // Left stick: the same push as the mobile joystick, so walking and speed match
+  const lx = stickOf(g.axes[0] || 0), ly = stickOf(g.axes[1] || 0);
+  if (lx || ly) { joy.x = lx; joy.y = -ly; joyFromPad = true; }
+  else if (joyFromPad) { joy.x = 0; joy.y = 0; joyFromPad = false; }
+  // Right stick: turns the camera. Pushing up looks up.
+  const rx = stickOf(g.axes[2] || 0), ry = stickOf(g.axes[3] || 0);
+  if (rx) view.yaw -= rx * PAD.look * dt;
+  if (ry) view.pitch = clamp(view.pitch + ry * PAD.lookPitch * dt, 0.05, 1.3);
+  // Buttons act once, on the press
+  const press = i => { const now = !!(g.buttons[i] && g.buttons[i].pressed), was = !!padWasDown[i]; padWasDown[i] = now; return now && !was; };
+  const inMatch = !!state && (state.phase === 'fight' || state.phase === 'between');
+  if (press(9) && inMatch) { const leave = $('bLeave'); if (leave.onclick) leave.onclick(); } // Start leaves the match
+  if (press(10) && inMatch) toggleLock(); // right stick press: shift lock
+  if (!inFight()) { for (let i = 0; i < 16; i++) press(i); return; }
+  if (press(0)) onAction('m1');      // A: basic attack
+  if (press(1)) onAction('ability'); // B: ability
+  if (press(3)) onAction('ult');     // Y: ultimate
+  if (press(14)) onAction('move1');  // D-pad left
+  if (press(12)) onAction('move2');  // D-pad up
+  if (press(15)) onAction('move3');  // D-pad right
+  if (press(13)) onAction('move4');  // D-pad down
+}
+// ---- Game loop ----
+// Keyboard keys and the mobile joystick, combined into one push (x: right, y: forward)
+function moveInput() {
+  let mx = (held.move_right ? 1 : 0) - (held.move_left ? 1 : 0);
+  let mz = (held.move_up ? 1 : 0) - (held.move_down ? 1 : 0);
+  if (Math.hypot(joy.x, joy.y) > 0.12) { mx += joy.x; mz += joy.y; }
+  return { mx, mz };
+}
+function update(dt) {
+  T += dt;
+  if (!P) return;
+  if (keys.ArrowLeft) view.yaw -= 2 * dt;
+  if (keys.ArrowRight) view.yaw += 2 * dt;
+  if (keys.ArrowUp) view.pitch -= 0.8 * dt;
+  if (keys.ArrowDown) view.pitch += 0.8 * dt;
+  view.pitch = clamp(view.pitch, 0.05, 1.3);
+
+  if (!inFight() && !(state && state.phase === 'respawn')) {
+    updateMenuScene(dt);
+    return;
+  }
+
+  if (!O && state && (state.phase === 'fight' || state.phase === 'between' || state.phase === 'respawn') && !settingUp) {
+    settingUp = true;
+    ensureFighters(state)
+      .then(() => { resetFighters(state); settingUp = false; })
+      .catch(err => { console.error('Could not set up the fighters', err); settingUp = false; });
+  }
+  if (!O) return;
+  if (abil.lockStart) {
+    const ph = ((Date.now() + clockOffset - abil.lockStart) % 1200) / 1200;
+    $('lockMark').style.left = (ph < 0.5 ? ph * 2 : (1 - ph) * 2) * 100 + '%';
+  }
+  if (P.knockT > 0) {
+    P.knockT -= dt;
+    P.root.position.x += P.knockDir[0] * P.knockSpeed * dt;
+    P.root.position.z += P.knockDir[1] * P.knockSpeed * dt;
+    arenaClamp(P.root.position);
+  }
+  if (P.dashT > 0) {
+    P.dashT -= dt;
+    const v = (P.dashSpeed || 22) * dt;
+    const nx = P.root.position.x + P.dashDir[0] * v, nz = P.root.position.z + P.dashDir[1] * v;
+    P.root.position.x = nx; P.root.position.z = nz;
+    arenaClamp(P.root.position);
+    // Hitting a wall ends the dash, so nothing can be dashed through the barrier
+    if (Math.abs(P.root.position.x - nx) > 1e-6 || Math.abs(P.root.position.z - nz) > 1e-6) P.dashT = 0;
+  }
+  // Movement is relative to the camera. The camera points along -(sin yaw, cos yaw).
+  const fx = -Math.sin(view.yaw), fz = -Math.cos(view.yaw), rx = -fz, rz = fx;
+  const { mx, mz } = moveInput();
+  if ((mx || mz) && !(state && state.phase === 'respawn')) {
+    const vx = rx * mx + fx * mz, vz = rz * mx + fz * mz, l = Math.hypot(vx, vz);
+    // A small joystick push walks slower. Keyboard input is unchanged (capped at full speed).
+    const spd = (abil.tired ? 1.2 : P.speed) * Math.min(1, Math.hypot(mx, mz));
+    if (isFallen()) { const g = ghostPos(); g.x += vx / l * spd * dt; g.z += vz / l * spd * dt; clampGhost(g); }
+    else { P.root.position.x += vx / l * spd * dt; P.root.position.z += vz / l * spd * dt; }
+    arenaClamp(P.root.position);
+  }
+
+  // Facing: toward the opponent normally, or with the camera in shift lock
+  if (shiftLock && !isFallen()) P.root.rotation.y = view.yaw + Math.PI;
+  else faceNearest(myIndex);
+  FIGHTERS.forEach((f, i) => { if (i !== myIndex) faceNearest(i); });
+
+  sendT += dt;
+  if (sendT >= 0.05) {
+    sendT = 0;
+    if (!isFallen()) socket.emit('pos', { x: P.root.position.x, z: P.root.position.z, rot: P.root.rotation.y });
+  }
+
+  for (const k in oppTargets) {
+    const f = FIGHTERS[k], t = oppTargets[k];
+    if (!f || f === P) continue;
+    const a = Math.min(1, dt * 12);
+    f.root.position.x += (t.x - f.root.position.x) * a;
+    f.root.position.z += (t.z - f.root.position.z) * a;
+  }
+
+  moveFill = moveFill.map(f => Math.min(1, f + dt / MOVE_SECONDS));
+  renderMoves();
+  for (const f of FIGHTERS) {
+    f.cd = Math.max(0, f.cd - dt);
+    f.punch = Math.max(0, f.punch - dt);
+    f.inner.position.z = f.punch > 0 ? Math.sin(f.punch / 0.28 * Math.PI) * 0.7 : 0;
+  }
+
+  for (const f of FIGHTERS) updateAura(f, dt);
+  // Camera orbits the player
+  const cf = cameraFocus(); const tx = cf.x, tz = cf.z, ty = 1.6;
+  const cp = Math.cos(view.pitch), d = view.dist;
+  cam.position.set(tx + Math.sin(view.yaw) * cp * d, ty + Math.sin(view.pitch) * d, tz + Math.cos(view.yaw) * cp * d);
+  cam.lookAt(tx, ty, tz);
+}
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+let last = performance.now();
+(function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05); last = now;
+  requestAnimationFrame(frame);
+  try { update(dt); } catch (err) { console.error('Frame update failed', err); }
+  try { updateLieDown(dt); } catch (err) { console.error('Lie-down update failed', err); }
+  try { pollGamepad(dt); } catch (err) { console.error('Controller update failed', err); }
+  renderer.render(scene, cam);
+})(last);
+
+// ---- Screens ----
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  $('bgWrap').style.display = id === 'sHome' ? '' : 'none';
+  menuMode = id === 'sSelect' ? 'choose' : (id === 'sLobby' || id === 'sCreate' || id === 'sWait' || id === 'sMatch') ? 'join' : 'none';
+  if (stand) stand.visible = menuMode !== 'none';
+  if (id === 'sSelect') openChoose(); else clearCarousel();
+  if (id === 'sLobby') {
+    if (catalog[chosen]) $('chosenName').textContent = catalog[chosen].name;
+    previewKymera(chosen).catch(() => {});
+  }
+  if (id === 'sKeys') renderBinds();
+  if (id === 'sAccount') renderAccount();
+  if (id === 'sAudio') renderSettings();
+  if (id === 'sTitles') renderTitles();
+  if (id === 'sLayout') openLayout(); else if (layoutOpen) closeLayout();
+  if (id === 'sLeaders') requestLeaders();
+  if (id === 'sHistory') requestHistory();
+  if (id === 'sAdmin') requestAdmin();
+}
+function renderRoster() {
+  const box = $('roster');
+  if (!box) return;
+  box.innerHTML = '';
+  $('moneySel').textContent = profile.ks + ' K Serum';
+  Object.entries(catalog).forEach(([id, k]) => {
+    const isOwned = profile.owned.includes(id);
+    const card = document.createElement('div'); card.className = 'card';
+    const info = document.createElement('div');
+    const name = document.createElement('b'); name.textContent = k.name;
+    const note = document.createElement('span'); note.className = 'note';
+    note.textContent = k.title + ' · HP ' + k.hp + (k.lives > 1 ? ' x ' + k.lives + ' lives' : '') + ' · Speed ' + k.speed + (k.abilityLabel ? ' · ' + k.abilityLabel : '') + (k.desc ? ' · ' + k.desc : '') + (isOwned ? '' : ' · ' + k.price + ' K Serum');
+    info.append(name, note);
+    const btn = document.createElement('button');
+    if (isOwned) {
+      btn.textContent = chosen === id ? 'Selected' : 'Select';
+      btn.disabled = chosen === id;
+      btn.onclick = () => { chosen = id; previewKymera(id); renderRoster(); };
+    } else {
+      btn.textContent = 'Buy for ' + k.price + ' K Serum';
+      btn.disabled = profile.ks < k.price;
+      btn.onclick = () => socket.emit('buy', id, res => { $('shopMsg').textContent = res.error || 'Purchased ' + k.name + '!'; });
+    }
+    card.append(info, btn);
+    box.append(card);
+  });
+}
+
+function hideGameUI() { $('hud').style.display = 'none'; $('hudBottom').style.display = 'none'; $('mateBar').style.display = 'none'; $('enemy2Bar').style.display = 'none'; $('mobileHud').style.display = 'none'; joy.x = 0; joy.y = 0; }
+
+function showLobby(msg) {
+  state = null; lastRound = 0; oppTargets = {};
+  FIGHTERS.forEach(f => { f.root.visible = false; });
+  hideGameUI();
+  $('lobbyMsg').textContent = msg || '';
+  show('sLobby');
+}
+
+function resetFighters(s) {
+  s.players.forEach((q, i) => {
+    const f = FIGHTERS[i];
+    if (!f) return;
+    f.root.position.set(q.x, 0, q.z);
+    f.root.visible = true;
+    f.punch = 0; f.cd = 0; f.dashT = 0; f.knockT = 0;
+  });
+  oppTargets = {};
+  // Start with the camera behind my Kymera, facing the nearest enemy
+  if (O) {
+    const fx = O.root.position.x - P.root.position.x, fz = O.root.position.z - P.root.position.z;
+    view.yaw = Math.atan2(-fx, -fz);
+  }
+  view.pitch = 0.4; view.dist = 7.5;
+}
+
+socket.on('connect', () => {
+  $('connNote').textContent = 'Connected';
+  let tok = null;
+  try { tok = localStorage.getItem('kymera_token'); } catch (e) {}
+  if (tok) socket.emit('resume', tok, res => { if (res && res.error) clearToken(); });
+});
+socket.on('disconnect', () => {
+  $('connNote').textContent = 'Disconnected. Reconnecting...';
+  if (state) showLobby('Connection lost.');
+});
+
+socket.on('catalog', c => {
+  catalog = c;
+  SHOP.forEach(s => { if (!catalog[s.id]) catalog[s.id] = { name: s.name, price: typeof s.price === 'number' ? s.price : 0, placeholder: true }; });
+  ['bCreateRoom', 'bJoin', 'bRand1', 'bRand2', 'bRandFfa'].forEach(id => $(id).disabled = false);
+  previewKymera(chosen);
+});
+socket.on('profile', p => {
+  profile = p;
+  $('moneyTxt').textContent = p.ks + ' K Serum';
+  useAccountBinds(p);
+  loadSettingsLocal(); // this platform's settings, from the account when logged in
+  loadLayoutLocal();
+  if (document.querySelector('#sSelect.on')) renderChoose();
+  if (document.querySelector('#sAccount.on')) renderAccount();
+  if (document.querySelector('#sKeys.on')) renderBinds();
+});
+socket.on('state', async s => {
+  state = s; myIndex = s.index;
+  FIGHTER_TEAMS = (s.players || []).map(q => q.team);
+  FIGHTER_OUT = (s.players || []).map(q => !!(q.out || q.left));
+  $('moneyTxt').textContent = s.ks + ' K Serum';
+  if (s.phase === 'waiting') {
+    lastRound = 0; FIGHTERS.forEach(f => { f.root.visible = false; }); hideGameUI();
+    show('sWait');
+    return;
+  }
+  if (s.phase === 'over') {
+    hideGameUI();
+    $('matchTitle').textContent = s.matchResult === 'won' ? 'You won the match' : 'You lost the match';
+    const meOver = (s.players || []).find(q => q.index === s.index) || {};
+    $('matchMsg').textContent = s.mode === 'ffa'
+      ? 'Rounds won: ' + (meOver.roundWins || 0) + '. Kills: ' + (meOver.kills || 0) + '. Your K Serum: ' + s.ks + ' K Serum.'
+      : 'Rounds: ' + s.wins[0] + ' to ' + s.wins[1] + '. Your K Serum: ' + s.ks + ' K Serum.' + (s.matchResult === 'won' ? ' Match bonus: 20 K Serum.' : '');
+    show('sMatch');
+    return;
+  }
+  $('hud').style.display = 'flex'; $('hudBottom').style.display = 'flex';
+  $('mobileHud').style.display = platformNow() === 'mobile' ? 'block' : 'none';
+  show(null); // hide the lobby panels first, so the arena is visible even if loading fails
+  try {
+    if (s.round !== lastRound) {
+      lastRound = s.round;
+      resetMoves();
+      await ensureFighters(s);
+      resetFighters(s);
+    }
+  } catch (err) {
+    console.error('Could not set up the fighters', err);
+  }
+  lastSpawn = s.spawn;
+  (s.players || []).forEach((q, i) => { if (FIGHTERS[i]) FIGHTERS[i].root.visible = !q.left; });
+  $('hpP').style.width = (100 * s.hp[0] / s.hpMax[0]) + '%';
+  $('hpB').style.width = (100 * s.hp[1] / s.hpMax[1]) + '%';
+  const is2 = s.mode === '2v2';
+  const ffa = s.mode === 'ffa';
+  document.body.classList.toggle('ffa', ffa);
+  const mate = (s.players || []).find(q => q.team === s.team && q.index !== s.index);
+  const foes = (s.players || []).filter(q => q.team !== s.team);
+  $('mateBar').style.display = is2 ? '' : 'none';
+  $('enemy2Bar').style.display = is2 ? '' : 'none';
+  if (is2 && mate) $('hpM').style.width = (100 * mate.hp / mate.maxHp) + '%';
+  if (is2 && foes[1]) $('hpE2').style.width = (100 * foes[1].hp / foes[1].maxHp) + '%';
+  $('mTrackP').style.display = catalog[s.char] && catalog[s.char].meter ? '' : 'none';
+  $('mTrackB').style.display = catalog[s.oppChar] && catalog[s.oppChar].meter ? '' : 'none';
+  const selfP = (s.players || []).find(q => q.index === s.index);
+  if (selfP) $('youLabel').textContent = 'You' + (selfP.livesMax > 1 ? ' (Your Lives: ' + selfP.livesLeft + '/' + selfP.livesMax + ')' : '');
+  if (foes[0]) $('oppLabel').textContent = hudLabel(foes[0]);
+  if (mate) $('mateLabel').textContent = hudLabel(mate);
+  if (foes[1]) $('enemy2Label').textContent = hudLabel(foes[1]);
+  $('lives').textContent = ffa ? 'Kills: ' + (selfP ? (selfP.kills || 0) : 0) : '';
+  $('roundTxt').textContent = 'Round ' + s.round + ' of 3 · Rounds won ' + s.wins[0] + ' to ' + s.wins[1];
+  if (s.phase === 'respawn') {
+    $('roundTitle').textContent = 'Respawning';
+    $('roundMsg').textContent = 'Back to the starting spots.';
+    show('sRound');
+  } else if (s.phase === 'between') {
+    $('roundTitle').textContent = s.roundResult === 'won' ? 'You won round ' + s.round : 'You lost round ' + s.round;
+    $('roundMsg').textContent = (s.roundResult === 'won' ? 'You earned 5 K Serum. ' : '') + 'The next round starts shortly.';
+    show('sRound');
+  } else {
+    show(null);
+  }
+});
+
+socket.on('meter', m => {
+  $('mP').style.width = m.meter + '%';
+  $('mB').style.width = m.oppMeter + '%';
+  $('metalTag').textContent = m.metal ? 'METAL' : '';
+  if (P && P.metal !== m.metal) setMetal(P, m.metal);
+  if (O && O.metal !== m.oppMetal) setMetal(O, m.oppMetal);
+  if (m.metals) FIGHTERS.forEach((f, j) => { if (f && m.metals[j] !== undefined && f.metal !== !!m.metals[j]) setMetal(f, !!m.metals[j]); });
+});
+socket.on('ability', a => {
+  abil = a; clockOffset = a.serverNow - Date.now();
+  $('abil').textContent = '';
+  $('abFill').style.width = Math.round(a.abFill * 100) + '%';
+  $('abLabel').textContent = keyText(a.abLabel);
+  $('ultFill').style.width = Math.round(a.ultFill * 100) + '%';
+  $('ultLabel').textContent = Date.now() < ultNoteUntil ? 'Coming soon' : keyText(a.ultLabel);
+  refreshMoveNames();
+  $('lock').style.display = a.lockStart ? '' : 'none';
+  setAura(P, a.kind === 'aura' && a.aura);
+  (a.auras || []).forEach((on, i) => { if (i !== myIndex && FIGHTERS[i]) setAura(FIGHTERS[i], on); });
+});
+socket.on('dash', d => { if (P) { P.dashDir = [d.dx, d.dz]; P.dashT = d.dur / 1000; P.dashSpeed = d.speed || 22; } });
+socket.on('dashStop', () => { if (P) P.dashT = 0; });
+socket.on('knock', k => { if (P) { P.knockDir = [k.dx, k.dz]; P.knockT = k.dur / 1000; P.knockSpeed = k.dist / (k.dur / 1000); } });
+socket.on('punched', d => { const f = FIGHTERS[d.index]; if (f) f.punch = 0.28; });
+socket.on('posReset', d => {
+  const f = FIGHTERS[d.index];
+  if (f) {
+    f.root.position.set(d.x, 0, d.z); f.dashT = 0; f.knockT = 0;
+    setShield(f, true);
+    clearTimeout(f.shieldT);
+    f.shieldT = setTimeout(() => setShield(f, false), 3000);
+  }
+  delete oppTargets[d.index];
+});
+socket.on('posOf', p => { oppTargets[p.index] = p; });
+socket.on('opponentLeft', () => showLobby('Your opponent left, so the lobby closed.'));
+socket.on('playerLeft', d => showNotice(d.name + ' left.'));
+
+// ---- Start screens: platform choice first, then the home screen ----
+function showPlatform(p) {
+  $('platLabel').textContent = p === 'mobile' ? 'Mobile' : p === 'console' ? 'Console' : 'PC';
+  document.body.classList.toggle('mobile', p === 'mobile');
+  placeHudItems(p);
+  const keysBtn = $('bSetKeys');
+  if (keysBtn.dataset.pcLabel === undefined) keysBtn.dataset.pcLabel = keysBtn.textContent;
+  keysBtn.textContent = p === 'mobile' ? 'Button Configuration' : keysBtn.dataset.pcLabel;
+}
+function savePlatform(p) { try { localStorage.setItem('kymera_platform', p); } catch (e) {} loadSettingsLocal(); showPlatform(p); }
+function savedPlatform() { try { return localStorage.getItem('kymera_platform'); } catch (e) { return null; } }
+document.querySelectorAll('.platBtn').forEach(b => b.onclick = () => { savePlatform(b.dataset.plat); show('sHome'); });
+$('bPlatform').onclick = () => show('sPlatform');
+$('bPlay').onclick = () => show('sPlay');
+$('bBattle').onclick = () => show('sLobby');
+$('bWaves').onclick = () => show('sWaves');
+$('bSettings').onclick = () => show('sSettings');
+$('bSetAccount').onclick = () => show('sAccount');
+$('bSetKeys').onclick = () => show(platformNow() === 'mobile' ? 'sLayout' : 'sKeys');
+$('bSetAudio').onclick = () => show('sAudio');
+$('bChoose').onclick = () => show('sSelect');
+const INSTR_CONTROLS = {
+  pc: [
+    'W A S D move. Arrow keys or dragging the mouse turn the camera. The mouse wheel zooms. Shift turns shift lock on or off. Esc releases the mouse.',
+    "E uses your Kymera's ability. Space is the basic attack. Z, X, C, and V are Moves 1 to 4. G is the ultimate.",
+    'Every control can be changed in Key Binds.',
+  ],
+  mobile: [
+    'Move with the joystick in the bottom left. Push up to walk forward, relative to the camera. A light push walks slower.',
+    'Drag any empty part of the screen to turn the camera.',
+    "The fist is your basic attack. The star uses your Kymera's ability. The Ultimate bar shows when your ultimate is ready.",
+    'The four move squares along the bottom are coming soon.',
+    'Every control can be changed in Button Configuration, in Settings. Full screen, also in Settings, hides the browser bar.',
+  ],
+  console: [
+    'The left stick moves. The right stick turns the camera.',
+    'A is the basic attack. B is your Kymera\'s ability. Y is the ultimate.',
+    'Moves 1 to 4 are on the D-pad: left, up, right, and down.',
+    'Start leaves the match. Press the right stick in to turn shift lock on or off.',
+  ],
+};
+function renderInstructions() {
+  const box = $('instrControls'); box.innerHTML = '';
+  const here = platformNow();
+  const plat = here === 'mobile' || here === 'console' ? here : 'pc';
+  INSTR_CONTROLS[plat].forEach(text => { const p = document.createElement('p'); p.textContent = text; box.appendChild(p); });
+}
+$('bInstr').onclick = () => { renderInstructions(); show('sInstr'); };
+// Rotating background, one image every 6 seconds
+const BG_FILES = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
+const bgEls = BG_FILES.map((f, i) => {
+  const d = document.createElement('div');
+  d.className = 'bg' + (i === 0 ? ' on' : '');
+  d.style.backgroundImage = "url('ui/" + f + "')";
+  $('bgWrap').appendChild(d);
+  return d;
+});
+let bgIdx = 0;
+setInterval(() => {
+  bgEls[bgIdx].classList.remove('on');
+  bgIdx = (bgIdx + 1) % bgEls.length;
+  bgEls[bgIdx].classList.add('on');
+}, 6000);
+// First visit asks for a platform. After that, the home screen opens directly.
+const remembered = savedPlatform();
+showPlatform(remembered || 'pc');
+show(remembered ? 'sHome' : 'sPlatform');
+// ---- Key binds ----
+const ACTIONS = [
+  ['move_up', 'Move up', 'KeyW'], ['move_left', 'Move left', 'KeyA'], ['move_down', 'Move down', 'KeyS'], ['move_right', 'Move right', 'KeyD'],
+  ['ability', 'Ability', 'KeyE'], ['ult', 'Ultimate', 'KeyG'], ['m1', 'Basic attack (M1)', 'Space'],
+  ['move1', 'Move 1', 'KeyZ'], ['move2', 'Move 2', 'KeyX'], ['move3', 'Move 3', 'KeyC'], ['move4', 'Move 4', 'KeyV'],
+];
+const DEFAULT_BINDS = Object.fromEntries(ACTIONS.map(a => [a[0], a[2]]));
+const LABEL = Object.fromEntries(ACTIONS.map(a => [a[0], a[1]]));
+const RESERVED_KEYS = ['Escape', 'ShiftLeft', 'ShiftRight', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+const MOUSE_NAMES = ['Left mouse', 'Middle mouse', 'Right mouse', 'Mouse 4', 'Mouse 5'];
+let binds = { ...DEFAULT_BINDS }, bindLookup = {}, listening = null;
+let selectedMap = 'qvx', lobbyInfo = null;
+const MAP_NAMES = { qvx: 'QVX (blue)', imira: 'Last Stand for Imira (red)', plains: 'Plains (Free For All)' };
+const bindName = c => c.startsWith('Mouse') ? (MOUSE_NAMES[Number(c.slice(5))] || c) : c.replace(/^Key/, '').replace(/^Digit/, '');
+function rebuildLookup() { bindLookup = {}; Object.entries(binds).forEach(([a, k]) => { bindLookup[k] = a; }); }
+function platformNow() { try { const v = localStorage.getItem('kymera_platform'); return v === 'mobile' || v === 'console' ? v : 'pc'; } catch (e) { return 'pc'; } }
+function loadLocalBinds() {
+  try { const s = JSON.parse(localStorage.getItem('kymera_binds_' + platformNow())); if (s) binds = { ...DEFAULT_BINDS, ...s }; } catch (e) {}
+  rebuildLookup();
+}
+function saveLocalBinds() { try { localStorage.setItem('kymera_binds_' + platformNow(), JSON.stringify(binds)); } catch (e) {} }
+function useAccountBinds(p) {
+  const saved = p.binds && p.binds[platformNow()];
+  if (saved && Object.keys(saved).length) { binds = { ...DEFAULT_BINDS, ...saved }; rebuildLookup(); }
+}
+function renderBinds() {
+  const plat = platformNow();
+  $('kbDevice').textContent = plat === 'mobile' ? 'Mobile' : 'PC';
+  $('kbMobile').style.display = plat === 'mobile' ? '' : 'none';
+  $('kbRows').style.display = plat === 'mobile' ? 'none' : '';
+  const rows = $('kbRows'); rows.innerHTML = '';
+  const used = {};
+  Object.entries(binds).forEach(([a, k]) => { (used[k] = used[k] || []).push(a); });
+  ACTIONS.forEach(([id]) => {
+    const row = document.createElement('div'); row.className = 'bindrow';
+    const name = document.createElement('span'); name.textContent = LABEL[id];
+    const btn = document.createElement('button'); btn.className = 'bindbtn';
+    btn.textContent = listening === id ? 'Press a key or mouse button...' : bindName(binds[id]);
+    if (used[binds[id]] && used[binds[id]].length > 1) btn.classList.add('bad');
+    btn.onclick = () => { listening = id; renderBinds(); };
+    row.append(name, btn); rows.append(row);
+  });
+  const clashes = Object.entries(used).filter(([k, as]) => as.length > 1);
+  $('kbSave').disabled = plat === 'mobile' || clashes.length > 0;
+  if (clashes.length) $('kbMsg').textContent = 'Invalid: ' + clashes.map(([k, as]) => bindName(k) + ' is used for ' + as.map(a => LABEL[a]).join(' and ')).join('. ') + '. Change one of them to save.';
+  else if (listening) $('kbMsg').textContent = 'Press the new key or mouse button. Esc cancels.';
+  else $('kbMsg').textContent = '';
+}
+function captureBind(code) {
+  const id = listening; listening = null;
+  if (!id) return;
+  if (code === 'Escape') return renderBinds();
+  if (RESERVED_KEYS.includes(code)) { renderBinds(); $('kbMsg').textContent = 'That key is reserved for the camera or shift lock.'; return; }
+  binds[id] = code; renderBinds();
+}
+document.addEventListener('keydown', e => { if (listening) { e.preventDefault(); captureBind(e.code); } }, true);
+document.addEventListener('pointerdown', e => { if (listening) { e.preventDefault(); captureBind('Mouse' + e.button); } }, true);
+$('kbReset').onclick = () => { binds = { ...DEFAULT_BINDS }; listening = null; rebuildLookup(); renderBinds(); };
+$('kbSave').onclick = () => {
+  rebuildLookup(); saveLocalBinds();
+  socket.emit('setBinds', { platform: platformNow(), binds }, res => {
+    $('kbMsg').textContent = res.error ? res.error : res.local ? 'Saved on this device. Log in to save to your account.' : 'Saved to your account.';
+  });
+};
+loadLocalBinds();
+
+// ---- Choose Character: a stand per Kymera, arrows to slide between them, and a stats panel ----
+const CS_COLORS = { xeno: '#800000', cc: '#f2c230', tm: '#43d17a' };
+// Cheapest first. Ties keep the server's order (Xeno before Tank Maestro).
+// The Kymera shop, in order. The stands run left to right through six tiers. Only the three real Kymera have models yet.
+const SHOP = [
+  { id: 'cress', name: 'Cress', tier: 1, color: '#1f3a93', price: 'free', real: false },
+  { id: 'vantage', name: 'Vantage', tier: 1, color: '#ff8c1a', price: 'free', real: false },
+  { id: 'spine', name: 'Spine Barker', tier: 1, color: '#1f6b3a', price: 'free', real: false },
+  { id: 'maw', name: 'Maw', tier: 2, color: '#1e3c8c', price: 100, real: false },
+  { id: 'bandit', name: 'Bandit Beak', tier: 3, color: '#8b5a2b', price: 600, real: false },
+  { id: 'tm', name: 'Tank Maestro', tier: 3, color: '#43d17a', price: 600, real: true },
+  { id: 'xeno', name: 'Xeno', tier: 3, color: '#800000', price: 600, real: true },
+  { id: 'vulker', name: 'Vulker', tier: 3, color: '#ff2a2a', price: 800, real: false },
+  { id: 'qing', name: 'Qing', tier: 3, color: '#87ceeb', price: 900, real: false },
+  { id: 'cc', name: 'CatClaw', tier: 4, color: '#f2c230', price: 1000, real: true },
+  { id: 'devma', name: 'Devma', tier: 4, color: '#9b59b6', price: 1200, real: false },
+  { id: 'hunter', name: 'Burning Hunter', tier: 5, color: '#d62828', price: 2000, real: false },
+  { id: 'gamno', name: 'Gamno', tier: 5, color: '#1f6b3a', price: 2200, real: false },
+  { id: 'kaizer', name: 'Kaizer', tier: 6, color: '#111111', price: '???', real: false },
+];
+const shopInfo = id => SHOP.find(s => s.id === id) || { color: '#ecdfc7', price: 0, real: false };
+const kymeraIds = () => SHOP.map(s => s.id);
+const ROW_DEPTH = 12; // distance between tier rows: far enough that the next tier sits behind the camera
+const SHOP_X = 14;   // the shopkeeper's counter: every tier is centred on it
+// Where a stand goes: across, centred on the shopkeeper within its tier; and one row further forward for each tier
+function shopPos(i) {
+  const s = SHOP[i];
+  const inTier = SHOP.map((x, j) => (x.tier === s.tier ? j : -1)).filter(j => j >= 0);
+  const k = inTier.indexOf(i), n = inTier.length;
+  return { x: SHOP_X + (k - (n - 1) / 2) * STAND_GAP, z: (s.tier - 1) * ROW_DEPTH };
+}
+function buildStand() {
+  stand = new THREE.Group();
+  const concrete = new THREE.MeshStandardMaterial({ color: 0x7d7a74, roughness: 0.95 });
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.2, 0.5, 48), concrete);
+  base.position.y = 0.25; base.receiveShadow = true;
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.45, 0.3, 48), concrete);
+  top.position.y = 0.65; top.receiveShadow = true;
+  const glow = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.06, 12, 96), new THREE.MeshBasicMaterial({ color: 0x7fd8ff }));
+  glow.rotation.x = Math.PI / 2; glow.position.y = 0.82;
+  stand.add(base, top, glow);
+  scene.add(stand);
+}
+function clearCarousel() { if (chooseRow) chooseRow.visible = false; }
+// Every Kymera stands on its own stand in one row, with a glow ring in its colour. The camera slides between them.
+// ---- The shop background: a long hallway with six tier signs, two posters on the back wall, and a shopkeeper at the far end ----
+let shopGroup = null, shopShown = false;
+function signTexture(text) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#1d1113'; g.fillRect(0, 0, 512, 128);
+  g.strokeStyle = '#c9a24a'; g.lineWidth = 8; g.strokeRect(6, 6, 500, 116);
+  g.fillStyle = '#e9dcc9'; g.font = 'bold 72px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, 256, 68);
+  return new THREE.CanvasTexture(c);
+}
+function drawSoldier(g, x, baseY, s) {
+  g.fillStyle = '#16367f'; g.fillRect(x - 34 * s, baseY - 22 * s, 28 * s, 22 * s); g.fillRect(x + 6 * s, baseY - 22 * s, 28 * s, 22 * s);
+  g.fillStyle = '#2350b8'; g.fillRect(x - 40 * s, baseY - 150 * s, 80 * s, 132 * s);
+  g.fillRect(x - 60 * s, baseY - 140 * s, 20 * s, 96 * s); g.fillRect(x + 40 * s, baseY - 140 * s, 20 * s, 96 * s);
+  g.fillStyle = '#e8c9a0'; g.beginPath(); g.arc(x, baseY - 186 * s, 26 * s, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#1a3a8c'; g.beginPath(); g.arc(x, baseY - 196 * s, 36 * s, Math.PI, 0); g.fill();
+  g.fillRect(x - 46 * s, baseY - 200 * s, 92 * s, 9 * s);
+}
+function velmariansPoster() {
+  const c = document.createElement('canvas'); c.width = 480; c.height = 620;
+  const g = c.getContext('2d');
+  g.fillStyle = '#c9d8ee'; g.fillRect(0, 0, 480, 620);
+  g.fillStyle = '#1f4fb4'; g.fillRect(0, 0, 480, 110);
+  g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  let fs = 50; g.font = 'bold ' + fs + 'px Georgia, serif';
+  while (g.measureText('Join The Velmarians!').width > 440 && fs > 20) { fs -= 2; g.font = 'bold ' + fs + 'px Georgia, serif'; }
+  g.fillText('Join The Velmarians!', 240, 58);
+  drawSoldier(g, 110, 560, 1); drawSoldier(g, 240, 585, 1.15); drawSoldier(g, 370, 560, 1);
+  g.strokeStyle = '#1f4fb4'; g.lineWidth = 12; g.strokeRect(6, 6, 468, 608);
+  return new THREE.CanvasTexture(c);
+}
+function buildShop() {
+  if (shopGroup) return shopGroup;
+  shopGroup = new THREE.Group();
+  const floorM = new THREE.MeshStandardMaterial({ color: 0x5b4636, roughness: 0.8 });
+  const wallM = new THREE.MeshStandardMaterial({ color: 0x3b2a2a, roughness: 0.9 });
+  const woodM = new THREE.MeshStandardMaterial({ color: 0x6a4a2e, roughness: 0.7 });
+  const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(80, 84), floorM);
+  floorMesh.rotation.x = -Math.PI / 2; floorMesh.position.set(SHOP_X, 0, 34); floorMesh.receiveShadow = true;
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(80, 7), wallM);
+  back.position.set(SHOP_X, 3.5, -7);
+  shopGroup.add(floorMesh, back);
+  // A tier sign above each row, behind its stands
+  const byTier = {};
+  SHOP.forEach((s, i) => { (byTier[s.tier] = byTier[s.tier] || []).push(i); });
+  Object.keys(byTier).forEach(t => {
+    const n = byTier[t].length;
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.8), new THREE.MeshBasicMaterial({ map: signTexture('Tier ' + t) }));
+    sign.position.set(SHOP_X, 4.4, (t - 1) * ROW_DEPTH - 2.4);
+    shopGroup.add(sign);
+  });
+  // The two posters on the back wall, behind Tier 1
+  const pyro = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 3.6), new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('ui/shop/pyro_wanted.png') }));
+  pyro.position.set(SHOP_X - 5.5, 2.4, -6.9);
+  const vel = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 3.75), new THREE.MeshBasicMaterial({ map: velmariansPoster() }));
+  vel.position.set(SHOP_X + 5.5, 2.4, -6.9);
+  shopGroup.add(pyro, vel);
+  // The shopkeeper, behind his counter, at the back of Tier 1
+  const counter = new THREE.Mesh(new THREE.BoxGeometry(6.2, 1.1, 1.4), woodM); counter.position.set(14, 0.55, -4.4);
+  const counterTop = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.08, 1.6), woodM); counterTop.position.set(14, 1.12, -4.4);
+  const shirt = new THREE.MeshStandardMaterial({ color: 0x3a6f4a, roughness: 0.8 });
+  const skin = new THREE.MeshStandardMaterial({ color: 0xd9a77a, roughness: 0.7 });
+  const hair = new THREE.MeshStandardMaterial({ color: 0x3b2a1a, roughness: 0.9 });
+  const sk = new THREE.Group();
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.5), shirt); torso.position.set(0, 1.55, 0);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 20, 16), skin); head.position.set(0, 2.35, 0);
+  const hairTop = new THREE.Mesh(new THREE.SphereGeometry(0.3, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), hair); hairTop.position.set(0, 2.42, 0);
+  sk.add(torso, head, hairTop); sk.position.set(14, 0, -5.8);
+  shopGroup.add(counter, counterTop, sk);
+  shopGroup.visible = false;
+  scene.add(shopGroup);
+  return shopGroup;
+}
+// Every Kymera stands on its own stand, with a glow ring in its colour. Stands without a model stay empty.
+function buildChooseRow() {
+  const row = chooseRow = new THREE.Group();
+  chooseOrder = kymeraIds().join(',');
+  scene.add(chooseRow);
+  const concrete = new THREE.MeshStandardMaterial({ color: 0x7d7a74, roughness: 0.95 });
+  SHOP.forEach((s, i) => {
+    const sp = shopPos(i);
+    const st = new THREE.Group();
+    st.position.set(sp.x, 0, sp.z);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.2, 0.5, 48), concrete);
+    base.position.y = 0.25; base.receiveShadow = true;
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.45, 0.3, 48), concrete);
+    top.position.y = 0.65; top.receiveShadow = true;
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.06, 12, 96), new THREE.MeshBasicMaterial({ color: s.color }));
+    ring.rotation.x = Math.PI / 2; ring.position.y = 0.82;
+    st.add(base, top, ring);
+    chooseRow.add(st);
+    if (!s.real) return; // coming soon: the stand stays empty
+    loadKymera(s.id).then(() => {
+      if (row !== chooseRow) return; // the row was rebuilt while this model loaded
+      const f = makeFighter(s.id);
+      scene.remove(f.root); chooseRow.add(f.root);
+      f.root.position.set(sp.x, 0.8, sp.z);
+      chooseFighters[i] = f;
+    }).catch(err => console.error('Could not load that Kymera', err));
+  });
+}
+function showChosen(idx) {
+  const ids = kymeraIds(); if (!ids.length) return;
+  csIndex = (idx + ids.length) % ids.length;
+  if (!chooseRow) buildChooseRow();
+  renderChoose();
+}
+function openChoose() {
+  if (!kymeraIds().length) return;
+  // A price change can change the order, so rebuild the row if it no longer matches
+  if (chooseRow && chooseOrder !== kymeraIds().join(',')) { scene.remove(chooseRow); chooseRow = null; chooseFighters = []; }
+  showChosen(Math.max(0, kymeraIds().indexOf(chosen)));
+  const sp0 = shopPos(csIndex); camChooseX = sp0.x; camChooseZ = sp0.z; // opening the screen shows the chosen Kymera with no slide
+}
+function renderChoose() {
+  const id = kymeraIds()[csIndex]; if (!id) return;
+  const k = catalog[id], sh = shopInfo(id);
+  $('csName').textContent = k.name;
+  $('csName').style.color = sh.color;
+  $('csName').style.textShadow = sh.color === '#111111' ? '0 0 3px #e9dcc9, 0 0 8px #e9dcc9' : '';
+  $('csSoon').textContent = sh.real ? '' : 'Coming soon';
+  const isOwned = sh.real && profile.owned.includes(id);
+  const price = sh.real ? k.price : sh.price;
+  $('csPrice').textContent = price === 'free' ? 'Free' : price === '???' ? '???' : isOwned ? 'Owned' : price + ' K Serum';
+  $('csAction').textContent = !sh.real ? (price === 'free' ? 'Select' : 'Buy') : (isOwned ? (chosen === id ? 'Selected' : 'Select') : 'Buy');
+  $('csAction').disabled = isOwned && chosen === id;
+  $('csStats').innerHTML = sh.real ? [
+    'Health: ' + k.hp + (k.lives > 1 ? ' per life, ' + k.lives + ' lives' : ''),
+    'Punch damage: ' + k.damage,
+    'Speed: ' + k.speed,
+    'Ability: ' + (k.abilityLabel || 'None'),
+    'Price: ' + k.price + ' K Serum',
+  ].map(t => '<div>' + t + '</div>').join('') : '<div>Stats coming soon</div>';
+}
+$('csPrev').onclick = () => showChosen(csIndex - 1);
+$('csNext').onclick = () => showChosen(csIndex + 1);
+$('csToggle').onclick = () => {
+  const open = $('csStats').style.display === 'none';
+  $('csStats').style.display = open ? '' : 'none';
+  $('csCaret').textContent = open ? 'v' : '^';
+};
+$('csAction').onclick = () => {
+  const id = kymeraIds()[csIndex];
+  if (!id) return;
+  if (!shopInfo(id).real) { $('csMsg').textContent = 'Coming soon.'; return; }
+  if (profile.owned.includes(id)) { chosen = id; $('csMsg').textContent = catalog[id].name + ' selected.'; renderChoose(); return; }
+  socket.emit('buy', id, res => { $('csMsg').textContent = res.error || 'Bought ' + catalog[id].name + '!'; });
+};
+// Menu scene: Join Game orbits the chosen Kymera, Choose Character shows the row of stands
+function updateMenuScene(dt) {
+  if ((menuMode === 'choose') !== shopShown) {
+    shopShown = menuMode === 'choose';
+    if (shopShown) { buildShop().visible = true; floor.visible = false; ring.visible = false; imiraGroup.visible = false; if (plainsGroup) plainsGroup.visible = false; }
+    else { if (shopGroup) shopGroup.visible = false; applyMap(currentMap); }
+  }
+  if (!stand) buildStand();
+  stand.visible = menuMode !== 'none';
+  if (menuMode === 'choose') {
+    if (P) P.root.visible = false;
+    if (stand) stand.visible = false; // the Join pedestal is not used on this screen
+    if (chooseRow) chooseRow.visible = true;
+    chooseFighters.forEach(f => { if (f) f.root.rotation.y += dt * 0.5; });
+    const sp = shopPos(csIndex);
+    camChooseX += (sp.x - camChooseX) * Math.min(1, dt * 6);
+    camChooseZ += (sp.z - camChooseZ) * Math.min(1, dt * 6);
+    cam.position.set(camChooseX, 2.6, camChooseZ + 8.5); cam.lookAt(camChooseX, 1.6, camChooseZ);
+    return;
+  }
+  if (P) { P.root.visible = true; P.root.position.set(0, 0.8, 0); P.root.rotation.y += dt * 0.4; }
+  const a = T * 0.18;
+  cam.position.set(Math.sin(a) * 7.5, 2.6 + Math.sin(T * 0.4) * 0.3, Math.cos(a) * 7.5);
+  cam.lookAt(0, 1.6, 0);
+}
+
+// ---- Accounts ----
+const saveToken = t => { try { localStorage.setItem('kymera_token', t); } catch (e) {} };
+function clearToken() { try { localStorage.removeItem('kymera_token'); } catch (e) {} }
+const acctMsg = t => { $('acctMsg').textContent = t || ''; };
+// ---- Find a player: search by part of a name, then open a public profile ----
+function runFind() {
+  const q = $('findName').value.trim();
+  $('findList').innerHTML = '';
+  if (!q) { $('findMsg').textContent = 'Type part of a username first.'; return; }
+  socket.emit('findPlayers', q, res => {
+    if (!res || res.error) { $('findMsg').textContent = (res && res.error) || 'Search failed.'; return; }
+    if (!res.results.length) { $('findMsg').textContent = 'No players match "' + q + '".'; return; }
+    const n = res.results.length;
+    $('findMsg').textContent = n === 10 ? 'Showing the first 10 matches. Type more of the name to narrow it down.' : n + ' player' + (n === 1 ? '' : 's') + ' found.';
+    res.results.forEach(r => {
+      const b = document.createElement('button');
+      b.className = 'ghost'; b.style.cssText = 'display:block;width:100%;margin:6px 0;text-align:left';
+      b.textContent = r.name;
+      b.onclick = () => openProfile(r.name);
+      $('findList').appendChild(b);
+    });
+  });
+}
+function openProfile(name) {
+  socket.emit('playerProfile', name, res => {
+    if (!res || res.error) { $('findMsg').textContent = (res && res.error) || 'Could not open that profile.'; return; }
+    renderProfile(res.profile);
+    show('sProfile');
+  });
+}
+function renderProfile(p) {
+  $('profTitle').textContent = p.name;
+  const body = $('profBody'); body.innerHTML = '';
+  const line = (label, value) => {
+    const d = document.createElement('p');
+    const b = document.createElement('b'); b.textContent = value; b.style.color = 'var(--bone)';
+    d.textContent = label + ': '; d.appendChild(b); body.appendChild(d);
+  };
+  line('K Serum', p.ks + ' K Serum');
+  line('Wins', String(p.wins));
+  line('Losses', String(p.losses));
+  line('Win rate', p.winRate === null ? 'no matches yet' : p.winRate + '%');
+  line('Title', p.equippedTitle ? p.equippedTitle.name : 'None');
+  line('Favorite Kymera', p.favorite && catalog[p.favorite] ? catalog[p.favorite].name : 'None');
+  line('Kymera owned', p.owned.length + ' of ' + kymeraIds().length);
+  const tog = document.createElement('button'); tog.className = 'stats-toggle'; tog.style.marginTop = '14px';
+  const tl = document.createElement('span'); tl.textContent = 'Last matches (' + p.matches.length + ')';
+  const tc = document.createElement('span'); tc.textContent = '^';
+  tog.append(tl, tc);
+  const list = document.createElement('div'); list.style.display = 'none';
+  tog.onclick = () => { const open = list.style.display === 'none'; list.style.display = open ? '' : 'none'; tc.textContent = open ? 'v' : '^'; };
+  body.appendChild(tog); body.appendChild(list);
+  if (!p.matches.length) { const n = document.createElement('p'); n.className = 'note'; n.textContent = 'No matches yet.'; list.appendChild(n); return; }
+  p.matches.forEach(m => {
+    const card = document.createElement('div'); card.className = 'card';
+    const d = document.createElement('div');
+    const t = document.createElement('b');
+    t.textContent = (m.result === 'won' ? 'Win' : m.result === 'lost' ? 'Loss' : 'Left') + ' · ' + m.score;
+    const s = document.createElement('span'); s.className = 'note';
+    s.textContent = (m.mode || '') + ' · ' + (m.char || '') + ' vs ' + (m.vs || '') + ' · ' + (m.map || '');
+    d.append(t, s); card.appendChild(d); list.appendChild(card);
+  });
+}
+$('bFindGo').onclick = runFind;
+// ---- Titles: wear one at a time. Your profile shows it; the lobby never does. ----
+function renderTitles() {
+  const list = $('titlesList'); list.innerHTML = ''; $('titlesMsg').textContent = '';
+  if (!profile.name) { $('titlesNote').textContent = 'Log in to earn titles and wear one.'; return; }
+  $('titlesNote').textContent = 'You can wear one title at a time. Only your profile shows it.';
+  const worn = profile.equippedTitle ? profile.equippedTitle.id : null;
+  const add = (label, color, id) => {
+    const b = document.createElement('button'); b.className = 'ghost';
+    b.style.cssText = 'display:block;width:100%;margin:6px 0;text-align:left' + (color ? ';color:' + color : '');
+    b.textContent = label + (worn === id ? '  (wearing)' : '');
+    b.onclick = () => wearTitle(id);
+    list.appendChild(b);
+  };
+  add('No title', '', null);
+  (profile.titles || []).forEach(t => add(t.name, t.color, t.id));
+}
+function wearTitle(id) {
+  socket.emit('setTitle', id, res => {
+    if (!res || res.error) { $('titlesMsg').textContent = (res && res.error) || 'Could not wear that title.'; return; }
+    $('titlesMsg').textContent = id ? 'Title worn.' : 'No title worn.';
+    renderTitles();
+  });
+}
+$('bFullscreen').onclick = () => {
+  const el = document.documentElement;
+  if (document.fullscreenElement) { (document.exitFullscreen || (() => {})).call(document); return; }
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (req) req.call(el); else $('bFullscreen').textContent = 'Full screen is not supported in this browser';
+};
+$('findName').addEventListener('keydown', e => { if (e.key === 'Enter') runFind(); });
+function renderAccount() {
+  const on = !!profile.name;
+  $('acctGuest').style.display = on ? 'none' : '';
+  $('acctUser').style.display = on ? '' : 'none';
+  if (!on) return;
+  $('accWho').textContent = profile.name;
+  $('accKs').textContent = profile.ks + ' K Serum';
+  $('accWins').textContent = profile.wins;
+  $('accLosses').textContent = profile.losses;
+  $('accRate').textContent = profile.winRate === null ? 'no matches yet' : profile.winRate + '%';
+  $('accTitles').textContent = profile.equippedTitle ? profile.equippedTitle.name : 'None';
+  $('accTitles').style.color = profile.equippedTitle ? profile.equippedTitle.color : '';
+  $('accOwned').textContent = profile.owned.length + ' of ' + kymeraIds().length;
+  const fav = $('accFav'); fav.innerHTML = '';
+  profile.owned.forEach(id => {
+    const o = document.createElement('option');
+    o.value = id; o.textContent = catalog[id] ? catalog[id].name : id;
+    o.selected = id === profile.favorite;
+    fav.appendChild(o);
+  });
+  $('goAdmin').style.display = profile.isOwner ? '' : 'none';
+}
+let nameTimer = null;
+$('accName').oninput = () => {
+  clearTimeout(nameTimer);
+  nameTimer = setTimeout(() => {
+    const v = $('accName').value.trim();
+    if (!v) { $('accNameMsg').textContent = ''; return; }
+    socket.emit('checkName', v, res => { $('accNameMsg').textContent = res.available ? 'That username is available.' : 'Taken or not allowed.'; });
+  }, 300);
+};
+$('accRegister').onclick = () => socket.emit('register', { name: $('accName').value.trim(), password: $('accPass').value }, res => {
+  if (res.error) return acctMsg(res.error);
+  saveToken(res.token); acctMsg('Welcome, ' + res.name + '!'); renderAccount();
+});
+$('accLogin').onclick = () => socket.emit('login', { name: $('accName').value.trim(), password: $('accPass').value }, res => {
+  if (res.error) return acctMsg(res.error);
+  saveToken(res.token); acctMsg('Logged in.'); renderAccount();
+});
+$('accLogout').onclick = () => socket.emit('logout', localStorage.getItem('kymera_token'), res => {
+  if (res.error) return acctMsg(res.error);
+  clearToken(); acctMsg('Logged out.'); renderAccount();
+});
+
+// ---- PC HUD: move squares, ability bar, and ultimate bar ----
+let moveFill = [0, 0, 0, 0], ultNoteUntil = 0;
+// Each fighter turns to the nearest living enemy (computed from positions, so every screen agrees)
+function faceNearest(i) {
+  const f = FIGHTERS[i];
+  if (!f || FIGHTER_OUT[i]) return; // a fallen fighter does not turn
+  let best = null, bd = Infinity;
+  FIGHTERS.forEach((g, j) => {
+    if (j === i || !g || FIGHTER_TEAMS[j] === FIGHTER_TEAMS[i] || FIGHTER_OUT[j] || !g.root.visible) return;
+    const d = Math.hypot(g.root.position.x - f.root.position.x, g.root.position.z - f.root.position.z);
+    if (d < bd) { bd = d; best = g; }
+  });
+  if (best) f.root.rotation.y = Math.atan2(best.root.position.x - f.root.position.x, best.root.position.z - f.root.position.z);
+}
+let noticeTimer = null;
+function showNotice(text) {
+  const n = $('notice');
+  n.textContent = text; n.style.display = '';
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(() => { n.style.display = 'none'; }, 4000);
+}
+const MOVE_SECONDS = 30; // move squares fill over this many seconds during a fight (placeholder)
+function renderMoves() { moveFill.forEach((f, i) => { $('mv' + (i + 1) + 'fill').style.height = Math.round(f * 100) + '%'; }); }
+function bumpMoves() { moveFill = moveFill.map(f => Math.min(1, f + 0.1)); renderMoves(); }
+function resetMoves() { moveFill = [0, 0, 0, 0]; renderMoves(); }
+function refreshMoveNames() { [1, 2, 3, 4].forEach(n => { $('mv' + n + 'name').textContent = 'Move ' + n + ' (' + bindName(binds['move' + n]) + ')'; }); }
+function keyText(t) {
+  return t.replace(/\(E\)/g, '(' + bindName(binds.ability) + ')')
+          .replace(/Press G/g, 'Press ' + bindName(binds.ult))
+          .replace(/\(G\)/g, '(' + bindName(binds.ult) + ')');
+}
+
+// ---- Arena limits: QVX is a circle, Last Stand for Imira is a rectangle ----
+const ARENA = { qvx: { r: 8.7 }, imira: { hx: 12.7, hz: 7.7 }, plains: { r: 17.4 } };
+let currentMap = 'qvx';
+function arenaClamp(pos) {
+  if (currentMap === 'imira') {
+    pos.x = Math.max(-ARENA.imira.hx, Math.min(ARENA.imira.hx, pos.x));
+    pos.z = Math.max(-ARENA.imira.hz, Math.min(ARENA.imira.hz, pos.z));
+    return;
+  }
+  const r = Math.hypot(pos.x, pos.z), R = currentMap === 'plains' ? ARENA.plains.r : ARENA.qvx.r;
+  if (r > R) { pos.x *= R / r; pos.z *= R / r; }
+}
+
+// ---- Last Stand for Imira: a rectangle with walls and the nuclear factory behind it ----
+const imiraGroup = new THREE.Group();
+(function buildImira() {
+  const hx = ARENA.imira.hx, hz = ARENA.imira.hz;
+  const dirt = new THREE.MeshStandardMaterial({ color: 0x3a1212, roughness: 0.95 });
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(hx * 2 + 4, 1, hz * 2 + 4), dirt);
+  pad.position.y = -0.5; pad.receiveShadow = true; imiraGroup.add(pad);
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x8a8580, roughness: 0.9 });
+  const red = new THREE.MeshStandardMaterial({ color: 0xa3202f, roughness: 0.6 });
+  const yellow = new THREE.MeshStandardMaterial({ color: 0xc9a227, roughness: 0.7 });
+  const wall = (w, d, x, z) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, d), wallMat);
+    m.position.set(x, 0.7, z); m.castShadow = true; m.receiveShadow = true; imiraGroup.add(m);
+  };
+  wall(hx * 2 + 1, 0.6, 0, hz + 0.3); wall(hx * 2 + 1, 0.6, 0, -hz - 0.3);
+  wall(0.6, hz * 2 + 1, hx + 0.3, 0); wall(0.6, hz * 2 + 1, -hx - 0.3, 0);
+  const fz = -hz - 9;
+  const block = new THREE.Mesh(new THREE.BoxGeometry(14, 6, 5), wallMat);
+  block.position.set(-4, 3, fz); block.castShadow = true; imiraGroup.add(block);
+  const tower = x => {
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 9, 24), wallMat);
+    t.position.set(x, 4.5, fz - 2); t.castShadow = true; imiraGroup.add(t);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 0.9, 24), yellow);
+    cap.position.set(x, 9.2, fz - 2); imiraGroup.add(cap);
+  };
+  tower(6); tower(12);
+  [-12, -10, -8].forEach(x => {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 10, 12), red);
+    c.position.set(x, 5, fz); c.castShadow = true; imiraGroup.add(c);
+  });
+  imiraGroup.visible = false;
+  scene.add(imiraGroup);
+})();
+
+// ---- Leaderboards, match history, gifts, favorite Kymera, and owner admin ----
+function addLine(ul, text, note) {
+  const li = document.createElement('li');
+  li.textContent = text;
+  if (note) li.className = 'note';
+  ul.appendChild(li);
+}
+function fillBoard(id, list, unit, titleLabel) {
+  const ol = $(id); ol.innerHTML = '';
+  if (!list.length) return addLine(ol, 'Nobody yet.', true);
+  list.forEach((e, i) => {
+    addLine(ol, (i + 1) + '. ' + e.name + ' - ' + e.value + ' ' + unit + (i < 3 ? '  (Rank ' + (i + 1) + ' for ' + titleLabel + ')' : ''));
+  });
+}
+function requestLeaders() {
+  socket.emit('leaderboard', res => {
+    fillBoard('lbWins', res.wins, 'wins', 'Wins');
+    fillBoard('lbKs', res.ks, 'K Serum', 'K Serum');
+  });
+}
+function requestHistory() {
+  socket.emit('getHistory', res => {
+    const m = $('histMatches'), g = $('histGifts');
+    m.innerHTML = ''; g.innerHTML = '';
+    if (res.error) return addLine(m, res.error, true);
+    if (!res.matches.length) addLine(m, 'No matches yet.', true);
+    res.matches.forEach(x => addLine(m, new Date(x.at).toLocaleDateString() + ': ' + (x.result === 'won' ? 'Won' : 'Lost') + ' ' + x.score + ' vs ' + x.vs + ' (' + x.char + ' vs ' + x.oppChar + ', ' + x.map + ')'));
+    if (!res.gifts.length) addLine(g, 'No gifts yet.', true);
+    res.gifts.forEach(x => addLine(g, new Date(x.at).toLocaleDateString() + ': ' + (x.dir === 'sent' ? 'Sent ' : 'Received ') + x.amount + ' K Serum ' + (x.dir === 'sent' ? 'to ' : 'from ') + x.with));
+  });
+}
+function requestAdmin() {
+  socket.emit('adminList', res => {
+    const ul = $('adminList'); ul.innerHTML = '';
+    if (res.error) { $('adminMsg').textContent = res.error; return; }
+    res.users.forEach(u => {
+      const li = document.createElement('li');
+      const label = document.createElement('span');
+      label.textContent = u.name + ' - ' + u.ks + ' K Serum, ' + u.wins + ' wins, ' + u.losses + ' losses  ';
+      const del = document.createElement('button');
+      del.className = 'ghost'; del.textContent = 'Delete';
+      del.onclick = () => {
+        if (!confirm('Delete ' + u.name + ' permanently?')) return;
+        socket.emit('adminDelete', u.key, r => { $('adminMsg').textContent = r.error || ('Deleted ' + u.name + '.'); requestAdmin(); });
+      };
+      li.append(label, del);
+      ul.appendChild(li);
+    });
+  });
+}
+$('accFavSave').onclick = () => socket.emit('setFavorite', $('accFav').value, res => acctMsg(res.error || 'Favorite saved.'));
+$('giftBtn').onclick = () => socket.emit('sendGift', { to: $('giftTo').value.trim(), amount: Number($('giftAmt').value) }, res => { $('giftMsg').textContent = res.error || 'Sent!'; });
+$('goLeaders').onclick = () => show('sLeaders');
+$('goHistory').onclick = () => show('sHistory');
+$('goAdmin').onclick = () => show('sAdmin');
+$('csUnlock').onclick = () => socket.emit('unlockAll');
+socket.on('accountDeleted', () => { clearToken(); acctMsg('That account was deleted. You are playing as a guest.'); renderAccount(); });
+
+// ---- Settings: effect volume, music, track, and mouse sensitivity (saved per browser and to the account) ----
+const DEFAULT_SETTINGS = { fx: 70, music: 70, track: 'none', sens: 50 };
+let settings = { ...DEFAULT_SETTINGS }, settingsTimer = null;
+const mouseScale = () => settings.sens / 50; // 50 is the speed the mouse had before this setting existed
+// Settings are kept separately for PC and Mobile, like key binds. When logged in, the account's copy for this platform wins.
+const settingsKey = plat => 'kymera_settings_' + plat;
+function loadSettingsLocal() {
+  const plat = platformNow();
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(settingsKey(plat))); } catch (e) {}
+  // Before this change there was one set of settings for everyone. Those now belong to PC.
+  if (!s && plat === 'pc') { try { s = JSON.parse(localStorage.getItem('kymera_settings')); } catch (e) {} }
+  if (profile.settings && profile.settings[plat]) s = profile.settings[plat];
+  settings = { ...DEFAULT_SETTINGS, ...(s || {}) };
+  syncSensLabel();
+}
+function syncSensLabel() {
+  const mobile = platformNow() === 'mobile';
+  $('sensLabel').textContent = mobile ? 'Drag sensitivity' : 'Mouse sensitivity';
+  $('audioPlat').textContent = mobile ? 'Mobile' : 'PC';
+}
+function saveSettings() {
+  const plat = platformNow();
+  try { localStorage.setItem(settingsKey(plat), JSON.stringify(settings)); } catch (e) {}
+  clearTimeout(settingsTimer);
+  const snapshot = { ...settings };
+  settingsTimer = setTimeout(() => { if (profile.name) socket.emit('setSettings', { platform: plat, settings: snapshot }); }, 400);
+}
+function renderSettings() {
+  syncSensLabel();
+  $('fxSlider').value = settings.fx; $('fxNum').value = settings.fx;
+  $('musicSlider').value = settings.music; $('musicNum').value = settings.music;
+  $('sensSlider').value = settings.sens; $('sensNum').value = settings.sens;
+  $('trackSelect').value = settings.track;
+}
+function bindSetting(sliderId, numId, key, min, max) {
+  const sl = $(sliderId), nu = $(numId);
+  sl.oninput = () => { settings[key] = Number(sl.value); nu.value = settings[key]; saveSettings(); };
+  nu.onchange = () => {
+    let v = Math.round(Number(nu.value));
+    if (!Number.isFinite(v)) v = settings[key];
+    v = Math.max(min, Math.min(max, v));
+    settings[key] = v; sl.value = v; nu.value = v;
+    saveSettings();
+  };
+}
+bindSetting('fxSlider', 'fxNum', 'fx', 0, 100);
+bindSetting('musicSlider', 'musicNum', 'music', 0, 100);
+bindSetting('sensSlider', 'sensNum', 'sens', 1, 100);
+$('trackSelect').onchange = () => { settings.track = $('trackSelect').value; saveSettings(); };
+loadSettingsLocal(); // after the settings block exists, so the saved values load on refresh
+
+// ---- Battle: create, join by code, join random, and the waiting room ----
+// Free For All: a huge grassy plain, with a katana lying in the middle
+let plainsGroup = null;
+function buildPlains() {
+  if (plainsGroup) return plainsGroup;
+  plainsGroup = new THREE.Group();
+  const tc = document.createElement('canvas'); tc.width = 256; tc.height = 256;
+  const g = tc.getContext('2d');
+  g.fillStyle = '#3fa62e'; g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 1400; i++) { g.fillStyle = Math.random() < 0.5 ? '#2c8f1f' : '#7ee05a'; g.fillRect(Math.random() * 256, Math.random() * 256, 2, 5 + Math.random() * 5); }
+  const gt = new THREE.CanvasTexture(tc); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.repeat.set(12, 12);
+  const grass = new THREE.Mesh(new THREE.CircleGeometry(22, 64), new THREE.MeshStandardMaterial({ map: gt, roughness: 1 }));
+  grass.rotation.x = -Math.PI / 2; grass.position.y = -0.01; grass.receiveShadow = true;
+  plainsGroup.add(grass);
+  // The katana: a wooden orange-brown handle, a dark guard, and a metal blade
+  const wood = new THREE.MeshStandardMaterial({ color: 0xc0701e, roughness: 0.6 });
+  const guardM = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.6, roughness: 0.5 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0xd8dde6, metalness: 1, roughness: 0.25 });
+  const kat = new THREE.Group();
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.1, 14), wood);
+  handle.rotation.z = Math.PI / 2; handle.position.set(0, 0.09, 0);
+  const guard = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.32, 0.12), guardM); guard.position.set(0.6, 0.09, 0);
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.03, 0.12), steel); blade.position.set(1.6, 0.09, 0);
+  kat.add(handle, guard, blade);
+  kat.rotation.y = 0.6; kat.position.set(0, 0.02, 0);
+  plainsGroup.add(kat);
+  plainsGroup.visible = false;
+  scene.add(plainsGroup);
+  return plainsGroup;
+}
+function applyMap(map) {
+  currentMap = map === 'imira' ? 'imira' : map === 'plains' ? 'plains' : 'qvx';
+  const imira = currentMap === 'imira', plains = currentMap === 'plains';
+  if (plains) buildPlains();
+  floor.visible = !imira && !plains; ring.visible = !imira && !plains;
+  imiraGroup.visible = imira;
+  if (plainsGroup) plainsGroup.visible = plains;
+  floor.material.color.set(0x13264a); ring.material.color.set(0x2f6fd6);
+}
+document.querySelectorAll('.mapBtn').forEach(b => b.onclick = () => {
+  selectedMap = b.dataset.map;
+  document.querySelectorAll('.mapBtn').forEach(x => x.classList.toggle('on', x === b));
+});
+$('bCreateRoom').onclick = () => show('sCreate');
+let selectedMode = '1v1';
+document.querySelectorAll('.modeBtn').forEach(b => b.onclick = () => {
+  selectedMode = b.dataset.mode;
+  document.querySelectorAll('.mapBtn').forEach(x => { x.parentElement.style.display = selectedMode === 'ffa' ? 'none' : ''; }); // Free For All always plays on the plain
+  document.querySelectorAll('.modeBtn').forEach(x => x.classList.toggle('on', x === b));
+});
+let selectedVisibility = 'private';
+document.querySelectorAll('.visBtn').forEach(b => b.onclick = () => {
+  selectedVisibility = b.dataset.vis;
+  document.querySelectorAll('.visBtn').forEach(x => x.classList.toggle('on', x === b));
+});
+$('bCreateGo').onclick = () => socket.emit('create', { char: chosen, map: selectedMap, mode: selectedMode, public: selectedVisibility === 'public' }, res => {
+  if (res.error) $('createMsg').textContent = res.error;
+});
+$('bJoin').onclick = () => socket.emit('join', { code: $('code').value, char: chosen }, res => {
+  if (res.error) $('lobbyMsg').textContent = res.error;
+});
+$('bRand1').onclick = () => socket.emit('joinRandom', { char: chosen, mode: '1v1' }, res => { if (res.error) $('lobbyMsg').textContent = res.error; });
+$('bRand2').onclick = () => socket.emit('joinRandom', { char: chosen, mode: '2v2' }, res => { if (res.error) $('lobbyMsg').textContent = res.error; });
+$('bRandFfa').onclick = () => socket.emit('joinRandom', { char: chosen, mode: 'ffa' }, res => { if (res.error) $('lobbyMsg').textContent = res.error; });
+socket.on('lobby', l => {
+  lobbyInfo = l;
+  $('lobbyCode').textContent = l.code;
+  $('waitMap').textContent = MAP_NAMES[l.map] || l.map;
+  $('waitMode').textContent = l.mode === 'ffa' ? 'Free For All' : l.mode === '2v2' ? '2v2' : '1v1';
+  renderSlots(l);
+  renderDetails(l);
+  $('bStart').style.display = l.isHost ? '' : 'none';
+  $('bStart').disabled = !l.canStart;
+  $('waitNote').textContent = l.isHost
+    ? (l.canStart ? 'Press Start when you are ready.' : (l.mode === '2v2' ? 'Waiting for 4 players, 2 on each side.' : 'Waiting for another player to join.'))
+    : 'Waiting for the host to start.';
+  applyMap(l.map);
+  show('sWait');
+});
+function renderSlots(l) {
+  if (l.mode === 'ffa') return renderSlotsFfa(l);
+  $('redCol').style.display = ''; $('blueHead').textContent = 'Blue side'; $('bSwitch').style.display = '';
+  ['sideBlue', 'sideRed'].forEach((id, team) => {
+    const box = $(id); box.innerHTML = '';
+    const mine = l.slots.filter(s => s.team === team);
+    for (let k = 0; k < l.perTeam; k++) {
+      const s = mine[k];
+      const card = document.createElement('div'); card.className = 'slot';
+      if (s) {
+        const img = document.createElement('img'); img.src = 'ui/icons/' + s.char + '.svg'; img.alt = '';
+        const txt = document.createElement('div');
+        const name = document.createElement('b');
+        name.textContent = s.name + (s.host ? ' (host)' : '') + (s.index === myIndex ? ' (you)' : '');
+        const sub = document.createElement('div'); sub.className = 'note';
+        sub.textContent = catalog[s.char] ? catalog[s.char].name : s.char;
+        txt.append(name, sub);
+        card.append(img, txt);
+      } else {
+        const empty = document.createElement('div'); empty.className = 'note'; empty.textContent = 'Open spot';
+        card.appendChild(empty);
+      }
+      box.appendChild(card);
+    }
+  });
+  const others = l.slots.filter(s => s.team === 1 - l.mySide).length;
+  $('bSwitch').disabled = others >= l.perTeam;
+}
+// Free For All: every player in one list, with open spots up to the room's size
+function renderSlotsFfa(l) {
+  $('redCol').style.display = 'none';
+  $('blueHead').textContent = 'Players (' + l.slots.length + ' of ' + l.size + ')';
+  $('bSwitch').style.display = 'none';
+  const box = $('sideBlue'); box.innerHTML = '';
+  for (let k = 0; k < l.size; k++) {
+    const s = l.slots[k];
+    const card = document.createElement('div'); card.className = 'slot';
+    if (s) {
+      const img = document.createElement('img'); img.src = 'ui/icons/' + s.char + '.svg'; img.alt = '';
+      const txt = document.createElement('div');
+      const name = document.createElement('b');
+      name.textContent = s.name + (s.host ? ' (host)' : '') + (s.index === myIndex ? ' (you)' : '');
+      const sub = document.createElement('div'); sub.className = 'note';
+      sub.textContent = catalog[s.char] ? catalog[s.char].name : s.char;
+      txt.append(name, sub);
+      card.append(img, txt);
+    } else {
+      const empty = document.createElement('div'); empty.className = 'note'; empty.textContent = 'Open spot';
+      card.appendChild(empty);
+    }
+    box.appendChild(card);
+  }
+}
+$('bSwitch').onclick = () => socket.emit('switchSide', res => { if (res && res.error) $('waitNote').textContent = res.error; });
+let detailsOpen = false;
+$('bDetails').onclick = () => {
+  detailsOpen = !detailsOpen;
+  $('detailsBox').style.display = detailsOpen ? '' : 'none';
+  $('bDetails').textContent = detailsOpen ? 'Details v' : 'Details ^';
+};
+function renderDetailsFfa(l) {
+  $('bSwitch').style.display = 'none';
+  const total = l.slots.length;
+  $('detMode').textContent = 'Free For All (' + total + ' of ' + l.size + ' players)';
+  $('detMap').textContent = MAP_NAMES[l.map] || l.map;
+  $('detVis').textContent = l.isPublic ? 'Public (Join Random)' : 'Private (code only)';
+  $('detBlue').textContent = ''; $('detRed').textContent = '';
+  const more = Math.max(0, 3 - total);
+  $('detStatus').textContent = l.canStart ? 'Ready. The host can start the match.' : 'Waiting for ' + more + ' more player' + (more === 1 ? '' : 's') + '. Free For All needs 3 to 10 players.';
+}
+function renderDetails(l) {
+  if (l.mode === 'ffa') return renderDetailsFfa(l);
+  $('bSwitch').style.display = '';
+  const per = l.perTeam, size = l.size, total = l.slots.length;
+  const blue = l.slots.filter(s => s.team === 0).length, red = l.slots.filter(s => s.team === 1).length;
+  $('detMode').textContent = (l.mode === '2v2' ? '2v2' : '1v1') + ' (' + size + ' players, ' + per + ' per side)';
+  $('detMap').textContent = MAP_NAMES[l.map] || l.map;
+  $('detVis').textContent = l.isPublic ? 'Public (Join Random)' : 'Private (code only)';
+  $('detBlue').textContent = blue + ' / ' + per;
+  $('detRed').textContent = red + ' / ' + per;
+  let status;
+  if (l.canStart) status = 'Ready. The host can start the match.';
+  else if (total < size) status = 'Waiting for ' + (size - total) + ' more player' + (size - total === 1 ? '' : 's') + '.';
+  else status = 'Sides are not balanced. Each side needs ' + per + ' player' + (per === 1 ? '' : 's') + '.';
+  $('detStatus').textContent = status;
+}
+$('bStart').onclick = () => socket.emit('start', res => { if (res && res.error) $('waitNote').textContent = res.error; });
+$('bCancel').onclick = () => { socket.emit('leave'); showLobby(''); };
+$('bDone').onclick = () => { socket.emit('leave'); showLobby(''); };
+$('bLeave').onclick = () => { socket.emit('leave'); showLobby(''); };
+
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
+</script>
+</body>
+</html>
